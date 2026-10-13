@@ -568,36 +568,36 @@
     const tbody = document.getElementById('userListBody');
     tbody.innerHTML = '';
     
-    const userKeys = Object.keys(users);
-    if (userKeys.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4">目前無使用者紀錄</td></tr>';
-      return;
-    }
+    let onlineCount = 0;
 
-    userKeys.forEach(uid => {
+    Object.keys(users).forEach(uid => {
       const u = users[uid];
-      const tr = document.createElement('tr');
-      const isBlocked = u.isBlocked || false;
-      const isOnline = u.online || false;
+      // 🟢 只過濾並顯示 online 為 true 的在線使用者
+      if (u.online === true) {
+        onlineCount++;
+        const tr = document.createElement('tr');
+        const isBlocked = u.isBlocked || false;
 
-      tr.innerHTML = `
-        <td><strong>${u.name || '無名氏'}</strong></td>
-        <td>
-          ${isOnline 
-            ? '<span class="status-badge"><span class="pulse-dot"></span>在線</span>' 
-            : '<span style="color:var(--text-muted); font-size:12px;">⚪ 離線</span>'
-          } 
-          ${isBlocked ? '<b style="color:var(--danger); margin-left:4px;">(已 Ban)</b>' : ''}
-        </td>
-        <td>${u.lastActive || '-'}</td>
-        <td>
-          <button class="btn ${isBlocked ? 'btn-primary' : 'btn-danger'}" style="padding:2px 8px; font-size:11px;" onclick="toggleBanUser('${uid}', ${isBlocked})">
-            ${isBlocked ? '🟢 解封 (Unban)' : '🚫 封鎖 (Ban)'}
-          </button>
-        </td>
-      `;
-      tbody.appendChild(tr);
+        tr.innerHTML = `
+          <td><strong>${u.name || '無名氏'}</strong></td>
+          <td>
+            <span class="status-badge"><span class="pulse-dot"></span>在線</span>
+            ${isBlocked ? '<b style="color:var(--danger); margin-left:4px;">(已 Ban)</b>' : ''}
+          </td>
+          <td>${u.lastActive || '-'}</td>
+          <td>
+            <button class="btn ${isBlocked ? 'btn-primary' : 'btn-danger'}" style="padding:2px 8px; font-size:11px;" onclick="toggleBanUser('${uid}', ${isBlocked})">
+              ${isBlocked ? '🟢 解封 (Unban)' : '🚫 封鎖 (Ban)'}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
     });
+
+    if (onlineCount === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">目前無使用者在線</td></tr>';
+    }
   });
 }
     function toggleBanUser(uid, currentStatus) {

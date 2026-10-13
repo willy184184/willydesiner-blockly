@@ -47,14 +47,13 @@
       --border-color: #e2e8f0;
       --radius: 8px;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
     * { box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { margin: 0; padding: 12px; background-color: var(--bg-main); color: var(--text-main); font-size: 14px; min-height: 100vh; }
     
-    /* 頂部選單 */
     .top-menu { 
       display: flex; 
       justify-content: space-between; 
@@ -77,7 +76,6 @@
     }
     .btn-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     
-    /* 按鈕元件 */
     .btn { 
       padding: 6px 14px; 
       border-radius: 6px; 
@@ -118,11 +116,8 @@
       font-size: 13px;
       outline: none;
       cursor: pointer;
-      transition: border-color 0.2s;
     }
-    .select-custom:focus { border-color: var(--primary); }
 
-    /* 主區域兩欄配置 */
     .main-wrapper { display: flex; gap: 12px; height: calc(100vh - 85px); }
     .left-area { flex: 7; display: flex; flex-direction: column; height: 100%; min-width: 0; }
     .right-area { 
@@ -138,7 +133,6 @@
       box-shadow: var(--shadow-sm);
     }
 
-    /* 頁籤 Toggle */
     .tab-bar { display: flex; gap: 6px; margin-bottom: 8px; }
     .tab-btn { 
       padding: 7px 16px; 
@@ -153,10 +147,9 @@
     .tab-btn:hover { background: #e2e8f0; color: var(--text-main); }
     .tab-btn.active { background: var(--bg-card); color: var(--primary); font-weight: 600; border-color: var(--border-color); box-shadow: var(--shadow-sm); }
     
-    /* 編輯視窗 */
     .editor-container { flex: 1; position: relative; border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
     #blocklyDiv { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-    #codeDisplay { 
+    #codeContainer { 
       width: 100%; 
       height: 100%; 
       position: absolute; 
@@ -164,56 +157,45 @@
       left: 0; 
       display: none; 
       background: #0f172a; 
-      color: #38bdf8; 
-      padding: 18px; 
-      margin: 0; 
-      overflow: auto; 
-      font-family: 'JetBrains Mono', monospace; 
+      padding: 12px; 
+      flex-direction: column;
+    }
+    #jsInputArea {
+      width: 100%;
+      flex: 1;
+      background: #0f172a;
+      color: #38bdf8;
+      border: none;
+      outline: none;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 13px;
       line-height: 1.6;
-      white-space: pre-wrap; 
+      resize: none;
     }
+    .js-tools { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #1e293b; }
 
-    /* 右側題目說明面板樣式 */
-    .q-title { text-align: center; color: var(--primary); font-size: 22px; font-weight: 700; margin-bottom: 15px; letter-spacing: -0.3px; }
+    .q-title { text-align: center; color: var(--primary); font-size: 22px; font-weight: 700; margin-bottom: 15px; }
     .q-section-title { font-weight: 600; color: #334155; margin: 16px 0 8px 0; font-size: 14px; border-bottom: 2px solid #f1f5f9; padding-bottom: 4px; }
     .q-content { font-size: 13px; line-height: 1.7; color: #475569; }
     
-    /* 表格樣式 */
     .sample-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; font-size: 13px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
     .sample-table th, .sample-table td { border-bottom: 1px solid var(--border-color); padding: 10px; vertical-align: middle; text-align: center; }
     .sample-table th { background-color: #f8fafc; color: #475569; font-weight: 600; }
-    .sample-table tr:last-child td { border-bottom: none; }
     .input-code-block { text-align: left; font-family: 'JetBrains Mono', monospace; white-space: pre-wrap; background: #f1f5f9; padding: 6px 10px; border-radius: 4px; font-size: 12px; color: #0f172a; }
 
-    /* Modal 視窗 */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 2000; }
-    .modal-content { background: white; padding: 24px; border-radius: 12px; width: 780px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: modalIn 0.2s ease-out; }
-    @keyframes modalIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+    .modal-content { background: white; padding: 24px; border-radius: 12px; width: 780px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
 
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #334155; font-size: 13px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s; }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+    .form-group input, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; }
     .test-case-card { border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #f8fafc; }
-    .test-case-row { display: flex; gap: 8px; margin-bottom: 6px; }
 
-    /* 排行榜標籤 */
     .rank-1 { background-color: #fef9c3; font-weight: bold; color: #854d0e; }
     .rank-2 { background-color: #f1f5f9; font-weight: bold; color: #475569; }
     .rank-3 { background-color: #ffedd5; font-weight: bold; color: #9a3412; }
     
-    .status-badge { 
-      font-size: 11px; 
-      padding: 3px 8px; 
-      border-radius: 20px; 
-      background: #dcfce7; 
-      color: #15803d; 
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
+    .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #dcfce7; color: #15803d; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
     .pulse-dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); animation: pulse 1.6s infinite; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
 
@@ -222,12 +204,14 @@
 </head>
 <body>
 
+  <!-- ⛔ 被 BAN / 封鎖時的畫面覆蓋層 -->
   <div id="blockScreen">
     <div style="font-size: 64px; margin-bottom: 16px;">⛔</div>
-    <div>您的使用權限已被管理員暫時封鎖</div>
-    <div style="font-size: 14px; color: #94a3b8; margin-top: 12px;">請聯繫系統管理員進行解鎖</div>
+    <div>您的使用權限已被管理員暫時封鎖 (Ban)</div>
+    <div style="font-size: 14px; color: #94a3b8; margin-top: 12px;">如有疑問，請聯繫系統管理員解鎖</div>
   </div>
 
+  <!-- 頂部選單 -->
   <div class="top-menu">
     <div class="btn-group">
       <span class="brand-title">willydesiner</span>
@@ -247,17 +231,24 @@
     </div>
   </div>
 
+  <!-- 主區域配置 -->
   <div class="main-wrapper">
     <div class="left-area">
       <div class="tab-bar">
         <button class="tab-btn active" onclick="switchTab('blocks')">🧱 積木工作區</button>
-        <button class="tab-btn" onclick="switchTab('javascript')">JavaScript</button>
+        <button class="tab-btn" onclick="switchTab('javascript')">JavaScript (可逆向)</button>
         <button class="tab-btn" onclick="switchTab('python')">Python</button>
         <button class="tab-btn" onclick="switchTab('xml')">XML 代碼</button>
       </div>
       <div class="editor-container">
         <div id="blocklyDiv"></div>
-        <pre id="codeDisplay"></pre>
+        <div id="codeContainer">
+          <textarea id="jsInputArea" placeholder="// 可以在此貼上 JS 程式碼，並點擊下方「將 JS 逆向轉為積木」"></textarea>
+          <div class="js-tools">
+            <span style="color:#94a3b8; font-size:12px;">支援基礎語法：let 變數、Prompt、Alert、加減乘除</span>
+            <button class="btn btn-primary" onclick="convertJsToBlockly()">🔄 將 JS 逆向轉為積木</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -283,10 +274,10 @@
     </div>
   </div>
 
-  <!-- 👤 登入 / 註冊 Modal -->
+  <!-- 👤 登入 Modal -->
   <div id="loginModal" class="modal">
     <div class="modal-content" style="width: 380px;">
-      <h3 style="text-align: center; margin-top: 0; color: var(--text-main);">👤 使用者登入 / 註冊</h3>
+      <h3 style="text-align: center; margin-top: 0;">👤 使用者登入 / 註冊</h3>
       <div class="form-group">
         <label>姓名 / 暱稱：</label>
         <input type="text" id="loginNameInput" placeholder="例如：王小明">
@@ -302,13 +293,13 @@
     </div>
   </div>
 
-  <!-- 🏆 多維度防刷分排行榜 Modal -->
+  <!-- 🏆 防刷分排行榜 Modal -->
   <div id="leaderboardModal" class="modal">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
         <div>
-          <h2 style="margin:0; font-size:20px; color: var(--text-main);">🏆 多維度防刷分排行榜</h2>
-          <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">比序規則：總分最高 ➔ 耗時最少 ➔ 積木數量最少（精簡程式）</div>
+          <h2 style="margin:0; font-size:20px;">🏆 多維度防刷分排行榜</h2>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">比序：最高分 ➔ 耗時最短 ➔ 積木最少 ➔ 最早完成</div>
         </div>
         <span class="status-badge"><span class="pulse-dot"></span> Live Sync</span>
       </div>
@@ -324,9 +315,7 @@
             <th width="14%">操作</th>
           </tr>
         </thead>
-        <tbody id="leaderboardBody">
-          <tr><td colspan="7">資料同步中...</td></tr>
-        </tbody>
+        <tbody id="leaderboardBody"><tr><td colspan="7">載入中...</td></tr></tbody>
       </table>
       <div style="text-align: right; margin-top: 20px;">
         <button class="btn" onclick="closeLeaderboardModal()">關閉</button>
@@ -334,23 +323,22 @@
     </div>
   </div>
 
-  <!-- ⚙️ 管理員後台 Modal -->
+  <!-- ⚙️ 管理員後台 Modal (含 Ban 帳號與題目管理) -->
   <div id="adminModal" class="modal">
     <div class="modal-content">
-      <h2 style="margin-top:0; font-size:20px; color: var(--text-main);">⚙️ 管理員控制台</h2>
+      <h2 style="margin-top:0;">⚙️ 管理員控制台</h2>
       
       <div class="tab-bar" style="margin-bottom: 15px;">
-        <button class="tab-btn active" onclick="switchAdminTab('users')">🟢 在線使用者</button>
+        <button class="tab-btn active" onclick="switchAdminTab('users')">🚫 帳號 Ban/解封與在線</button>
         <button class="tab-btn" onclick="switchAdminTab('questions')">📚 題目管理</button>
         <button class="tab-btn" onclick="switchAdminTab('addQ')">➕ 新增題目</button>
       </div>
 
-      <!-- 頁籤一：在線使用者 -->
       <div id="adminTabUsers">
-        <h3 style="font-size:15px; font-weight:600; margin-bottom:10px;">當前在線人數：<span id="onlineCount" style="color:var(--primary);">0</span> 人</h3>
+        <h3 style="font-size:15px; font-weight:600; margin-bottom:10px;">使用者監控 (點擊按鈕一鍵 Ban / 解鎖)</h3>
         <table class="sample-table">
           <thead>
-            <tr><th>姓名</th><th>狀態</th><th>最近時間</th><th>操作</th></tr>
+            <tr><th>姓名</th><th>狀態</th><th>最近活動時間</th><th>Ban 帳號管理</th></tr>
           </thead>
           <tbody id="userListBody"><tr><td colspan="4">載入中...</td></tr></tbody>
         </table>
@@ -359,41 +347,25 @@
         </div>
       </div>
 
-      <!-- 頁籤二：題目管理 (刪減) -->
       <div id="adminTabQuestions" style="display:none;">
-        <h3 style="font-size:15px; font-weight:600; margin-bottom:10px;">現有題目列表</h3>
         <table class="sample-table">
           <thead>
-            <tr>
-              <th width="30%">題目ID / 名稱</th>
-              <th width="45%">描述</th>
-              <th width="25%">操作</th>
-            </tr>
+            <tr><th width="30%">題目</th><th width="45%">描述</th><th width="25%">操作</th></tr>
           </thead>
           <tbody id="adminQListBody"><tr><td colspan="3">載入中...</td></tr></tbody>
         </table>
       </div>
 
-      <!-- 頁籤三：新增題目 -->
       <div id="adminTabAddQ" style="display:none;">
-        <div class="form-group">
-          <label>題目名稱：</label>
-          <input type="text" id="newTitle" placeholder="例如：畢氏定理與斜邊計算">
-        </div>
-        <div class="form-group">
-          <label>問題描述 (支援 LaTeX)：</label>
-          <textarea id="newDesc" rows="2"></textarea>
-        </div>
-        <div class="form-group">
-          <label>詳細說明 (支援 LaTeX)：</label>
-          <textarea id="newDetail" rows="3"></textarea>
-        </div>
+        <div class="form-group"><label>題目名稱：</label><input type="text" id="newTitle"></div>
+        <div class="form-group"><label>問題描述 (支援 LaTeX)：</label><textarea id="newDesc" rows="2"></textarea></div>
+        <div class="form-group"><label>詳細說明 (支援 LaTeX)：</label><textarea id="newDetail" rows="3"></textarea></div>
         <div class="form-group">
           <label>測試點設定：</label>
           <div id="testCasesContainer"></div>
-          <button type="button" class="btn" onclick="addTestCaseRow()">+ 增加一組測試點</button>
+          <button type="button" class="btn" onclick="addTestCaseRow()">+ 增加測試點</button>
         </div>
-        <button class="btn btn-primary" style="width: 100%; margin-top: 12px; padding: 10px;" onclick="saveNewQuestion()">儲存題目至雲端</button>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" onclick="saveNewQuestion()">儲存題目</button>
       </div>
 
       <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
@@ -402,13 +374,11 @@
     </div>
   </div>
 
-  <!-- Blockly 工具箱 -->
+  <!-- 🧱 擴充工具箱選單 (Toolbox) -->
   <xml id="toolbox" style="display: none">
     <category name="專用" colour="#ff0000">
       <block type="text_print"></block>
-      <block type="text_prompt_ext">
-        <value name="TEXT"><shadow type="text"><field name="TEXT">請輸入數據</field></shadow></value>
-      </block>
+      <block type="text_prompt_ext"><value name="TEXT"><shadow type="text"><field name="TEXT">請輸入數據</field></shadow></value></block>
     </category>
     <category name="邏輯" colour="%{BKY_LOGIC_HUE}">
       <block type="controls_if"></block>
@@ -416,6 +386,7 @@
       <block type="logic_operation"></block>
       <block type="logic_boolean"></block>
       <block type="logic_negate"></block>
+      <block type="logic_ternary"></block>
     </category>
     <category name="迴圈" colour="%{BKY_LOOPS_HUE}">
       <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
@@ -426,33 +397,43 @@
         <value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
       </block>
       <block type="controls_forEach"></block>
+      <block type="controls_flow_statements"></block>
     </category>
     <category name="數學" colour="%{BKY_MATH_HUE}">
       <block type="math_number"><field name="NUM">0</field></block>
       <block type="math_arithmetic"></block>
-      <block type="math_single"></block>
-      <block type="math_modulo"></block>
+      <!-- 開根號 sqrt、絕對值 abs、ln、exp 等進階運算 -->
+      <block type="math_single"><field name="OP">ROOT</field></block>
+      <block type="math_trig"><field name="OP">SIN</field></block>
+      <block type="math_constant"><field name="CONSTANT">PI</field></block>
+      <block type="math_number_property"></block>
       <block type="math_round"></block>
+      <block type="math_modulo"></block>
+      <block type="math_constrain"></block>
+      <block type="math_random_int">
+        <value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+        <value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
+      </block>
     </category>
     <category name="文字" colour="%{BKY_TEXTS_HUE}">
       <block type="text"></block>
       <block type="text_join"></block>
       <block type="text_append"></block>
       <block type="text_length"></block>
+      <block type="text_isEmpty"></block>
+      <block type="text_indexOf"></block>
+      <block type="text_charAt"></block>
       <block type="text_print"></block>
-      <block type="text_prompt_ext">
-        <value name="TEXT"><shadow type="text"><field name="TEXT">請輸入文字</field></shadow></value>
-      </block>
     </category>
     <category name="清單" colour="%{BKY_LISTS_HUE}">
-      <block type="lists_create_with"><mutation items="0"></mutation></block>
+      <block type="lists_create_empty"></block>
       <block type="lists_create_with"></block>
-      <block type="lists_repeat">
-        <value name="NUM"><shadow type="math_number"><field name="NUM">5</field></shadow></value>
-      </block>
+      <block type="lists_repeat"></block>
       <block type="lists_length"></block>
       <block type="lists_isEmpty"></block>
+      <block type="lists_indexOf"></block>
       <block type="lists_getIndex"></block>
+
       <block type="lists_setIndex"></block>
     </category>
     <category name="變數" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}"></category>
@@ -461,9 +442,8 @@
 
   <script>
     const ADMIN_PASSWORD = "Admin#9ay184184!Key";
-
     const firebaseConfig = {
-      apiKey: "AIzaSyCRH40ZJTAyZyGQEneE0FH9mb2RDKNutBs",
+       apiKey: "AIzaSyCRH40ZJTAyZyGQEneE0FH9mb2RDKNutBs",
   authDomain: "gay184184.firebaseapp.com",
   projectId: "gay184184",
   storageBucket: "gay184184.firebasestorage.app",
@@ -476,6 +456,7 @@
     let isCloudEnabled = false;
     let userId = localStorage.getItem('willydesiner_uid') || 'user_' + Math.random().toString(36).substr(2, 9);
     let userName = localStorage.getItem('willydesiner_uname') || '';
+    let lastSubmitTime = 0; // 防刷分冷卻時間記錄
     localStorage.setItem('willydesiner_uid', userId);
 
     try {
@@ -484,35 +465,15 @@
         db = firebase.database();
         isCloudEnabled = true;
       }
-    } catch(e) {
-      console.warn("Firebase 未連線。");
-    }
+    } catch(e) { console.warn("Firebase 未連線"); }
 
-    const defaultQuestions = [
-      {
-        id: "q_math_pythagoras",
-        title: "畢氏定理與斜邊計算",
-        desc: "給定直角三角形的兩股長 $a$ 與 $b$，求斜邊長 $c = \\sqrt{a^2 + b^2}$。",
-        detail: "畢氏定理關係式為：$$c = \\sqrt{a^2 + b^2}$$請將計算出的斜邊長結果輸出。",
-        testCases: [
-          { rawInput: "3 4", expected: "5", note: "當 $a=3, b=4$ 時，$c=\\sqrt{3^2+4^2}=5$" },
-          { rawInput: "5 12", expected: "13", note: "當 $a=5, b=12$ 時，$c=\\sqrt{5^2+12^2}=13$" }
-        ]
-      },
-      {
-        id: "q_multi_input",
-        title: "多組資料加總",
-        desc: "讀取多組包含兩個數值的資料，並計算每組數據的總和 $\\sum_{i=1}^n x_i$。",
-        detail: "輸入格式包含多行，每行有兩個數字，中間以空白隔開。",
-        testCases: [
-          { 
-            rawInput: "2 5\n3 9\n7 8\n4 6\n5 6", 
-            expected: "55", 
-            note: "讀入多組測資，計算總和 $\\sum = 2+5+3+9+7+8+4+6+5+6 = 55$。" 
-          }
-        ]
-      }
-    ];
+    const defaultQuestions = [{
+      id: "q_pythagoras",
+      title: "畢氏定理斜邊計算",
+      desc: "給定直角三角形兩股長 $a$ 與 $b$，求斜邊長 $c = \\sqrt{a^2 + b^2}$。",
+      detail: "關係式：$$c = \\sqrt{a^2 + b^2}$$",
+      testCases: [{ rawInput: "3 4", expected: "5", note: "$a=3, b=4 \\rightarrow c=5$" }]
+    }];
 
     let questions = [];
     let currentQuestion = null;
@@ -525,25 +486,15 @@
     });
 
     function getJSGen() { return (typeof javascript !== 'undefined' && javascript.javascriptGenerator) ? javascript.javascriptGenerator : Blockly.JavaScript; }
-    function getPyGen() { return (typeof python !== 'undefined' && python.pythonGenerator) ? python.pythonGenerator : Blockly.Python; }
 
-    function updateUserNameUI() {
-      document.getElementById('userDisplayName').innerText = userName || '未登入';
-    }
-
-    function openLoginModal() {
-      document.getElementById('loginNameInput').value = userName;
-      document.getElementById('loginPasswordInput').value = '';
-      document.getElementById('loginModal').style.display = 'flex';
-    }
-
+    function updateUserNameUI() { document.getElementById('userDisplayName').innerText = userName || '未登入'; }
+    function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
     function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
 
     function performLogin() {
       const name = document.getElementById('loginNameInput').value.trim();
       const pwd = document.getElementById('loginPasswordInput').value.trim();
-
-      if (!name || !pwd) return alert("請輸入完整姓名與密碼！");
+      if (!name || !pwd) return alert("請輸入姓名與密碼");
 
       if (!isCloudEnabled) {
         userName = name;
@@ -553,33 +504,17 @@
         return;
       }
 
-      const userAccountRef = db.ref('accounts/' + name);
-      userAccountRef.once('value').then((snapshot) => {
-        if (snapshot.exists()) {
-          const storedData = snapshot.val();
-          if (storedData.password === pwd) {
-            userName = name;
-            userId = storedData.uid || userId;
-            localStorage.setItem('willydesiner_uname', userName);
-            localStorage.setItem('willydesiner_uid', userId);
-            updateUserNameUI();
-            updateOnlineStatus();
-            alert(`歡迎回來，${userName}！`);
-            closeLoginModal();
-          } else {
-            alert("❌ 密碼錯誤！");
-          }
+      const ref = db.ref('accounts/' + name);
+      ref.once('value').then(snap => {
+        if (snap.exists() && snap.val().password !== pwd) {
+          alert("❌ 密碼錯誤！");
         } else {
-          if (confirm(`使用者 「${name}」 尚未存在，是否以此密碼建立新帳號？`)) {
-            userAccountRef.set({ uid: userId, password: pwd, createdAt: Date.now() }).then(() => {
-              userName = name;
-              localStorage.setItem('willydesiner_uname', userName);
-              updateUserNameUI();
-              updateOnlineStatus();
-              alert(`🎉 帳號註冊成功！`);
-              closeLoginModal();
-            });
-          }
+          if (!snap.exists()) ref.set({ uid: userId, password: pwd });
+          userName = name;
+          localStorage.setItem('willydesiner_uname', userName);
+          updateUserNameUI();
+          updateOnlineStatus();
+          closeLoginModal();
         }
       });
     }
@@ -587,44 +522,36 @@
     function initUserTracker() {
       updateUserNameUI();
       if (!isCloudEnabled) return;
-
       const userRef = db.ref('users/' + userId);
-      db.ref('.info/connected').on('value', (snap) => {
+      db.ref('.info/connected').on('value', snap => {
         if (snap.val() === true) {
           userRef.onDisconnect().update({ online: false });
           updateOnlineStatus();
         }
       });
-
-      userRef.child('isBlocked').on('value', (snapshot) => {
-        document.getElementById('blockScreen').style.display = snapshot.val() ? 'flex' : 'none';
+      // 🚫 即時 Ban 帳號監聽
+      userRef.child('isBlocked').on('value', snap => {
+        document.getElementById('blockScreen').style.display = snap.val() ? 'flex' : 'none';
       });
     }
 
     function updateOnlineStatus() {
       if (!isCloudEnabled) return;
-      const now = new Date();
-      const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
       db.ref('users/' + userId).update({
-        name: userName || '未登入使用者',
+        name: userName || '無名氏',
         online: true,
-        lastActive: timeStr,
+        lastActive: new Date().toLocaleTimeString(),
         timestamp: Date.now()
       });
     }
 
     function openAdminPanel() {
-      const pwd = prompt("🔐 請輸入管理員密碼：");
-      if (pwd === ADMIN_PASSWORD) {
+      if (prompt("🔐 管理員密碼：") === ADMIN_PASSWORD) {
         document.getElementById('adminModal').style.display = 'flex';
         loadAdminUsers();
         loadAdminQuestions();
-      } else if (pwd !== null) {
-        alert("❌ 密碼錯誤！");
-      }
+      } else alert("❌ 密碼錯誤");
     }
-
     function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
 
     function switchAdminTab(tab) {
@@ -636,34 +563,31 @@
 
     function loadAdminUsers() {
       if (!isCloudEnabled) return;
-      db.ref('users').on('value', (snapshot) => {
-        const users = snapshot.val() || {};
+      db.ref('users').on('value', snap => {
+        const users = snap.val() || {};
         const tbody = document.getElementById('userListBody');
         tbody.innerHTML = '';
-        let onlineCount = 0;
-
         Object.keys(users).forEach(uid => {
           const u = users[uid];
-          if (u.online === true) {
-            onlineCount++;
-            const tr = document.createElement('tr');
-            const isBlocked = u.isBlocked || false;
-            tr.innerHTML = `
-              <td><strong>${u.name || '無名氏'}</strong></td>
-              <td><span class="status-badge"><span class="pulse-dot"></span>在線中</span> ${isBlocked ? '<span style="color:var(--danger); font-weight:600;">(已封鎖)</span>' : ''}</td>
-              <td>${u.lastActive || '未知'}</td>
-              <td>
-                <button class="btn ${isBlocked ? 'btn-primary' : 'btn-danger'}" style="padding: 2px 8px; font-size:11px;" onclick="toggleBlockUser('${uid}', ${isBlocked})">
-                  ${isBlocked ? '🟢 解鎖' : '🚫 封鎖'}
-                </button>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          }
+          const tr = document.createElement('tr');
+          const isBlocked = u.isBlocked || false;
+          tr.innerHTML = `
+            <td><strong>${u.name}</strong></td>
+            <td>${u.online ? '<span class="status-badge"><span class="pulse-dot"></span>在線</span>' : '離線'} ${isBlocked ? '<b style="color:var(--danger)">(已 Ban)</b>' : ''}</td>
+            <td>${u.lastActive || '-'}</td>
+            <td>
+              <button class="btn ${isBlocked ? 'btn-primary' : 'btn-danger'}" style="padding:2px 8px; font-size:11px;" onclick="toggleBanUser('${uid}', ${isBlocked})">
+                ${isBlocked ? '🟢 解封 (Unban)' : '🚫 封鎖 (Ban)'}
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
         });
-        document.getElementById('onlineCount').innerText = onlineCount;
-        if (onlineCount === 0) tbody.innerHTML = '<tr><td colspan="4">目前無使用者在線</td></tr>';
       });
+    }
+
+    function toggleBanUser(uid, currentStatus) {
+      if (isCloudEnabled) db.ref('users/' + uid).update({ isBlocked: !currentStatus });
     }
 
     function loadAdminQuestions() {
@@ -673,42 +597,32 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><strong>${q.title}</strong><br><span style="font-size:11px; color:var(--text-muted);">${q.id}</span></td>
-          <td style="text-align:left; font-size:12px;">${q.desc.substring(0, 40)}...</td>
-          <td>
-            <button class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="deleteQuestion('${q.id}')">🗑 刪除題目</button>
-          </td>
+          <td style="text-align:left; font-size:12px;">${(q.desc || '').substring(0, 40)}...</td>
+          <td><button class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="deleteQuestion('${q.id}')">🗑 刪除題目</button></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
     function deleteQuestion(qId) {
-      if (confirm(`確定要刪除題目 (ID: ${qId}) 嗎？此操作不可逆！`)) {
+      if (confirm(`確定要刪除題目 (ID: ${qId}) 嗎？`)) {
         if (isCloudEnabled) {
-          db.ref('questions/' + qId).remove().then(() => {
-            alert("題目已刪除！");
-          });
+          db.ref('questions/' + qId).remove().then(() => alert("題目已刪除！"));
         } else {
           questions = questions.filter(q => q.id !== qId);
           renderSelectOptions();
-          if (questions.length > 0) loadQuestion(questions[0].id);
+          if (questions.length) loadQuestion(questions[0].id);
           loadAdminQuestions();
-          alert("預設題目已刪除（本地）。");
         }
       }
     }
 
-    function toggleBlockUser(uid, currentStatus) {
-      if (isCloudEnabled) db.ref('users/' + uid).update({ isBlocked: !currentStatus });
-    }
-
     function initQuestions() {
       if (isCloudEnabled) {
-        db.ref('questions').on('value', (snapshot) => {
-          const data = snapshot.val();
-          questions = data ? Object.values(data) : defaultQuestions;
+        db.ref('questions').on('value', snap => {
+          questions = snap.val() ? Object.values(snap.val()) : defaultQuestions;
           renderSelectOptions();
-          if (questions.length > 0) loadQuestion(questions[0].id);
+          if (questions.length) loadQuestion(questions[0].id);
         });
       } else {
         questions = defaultQuestions;
@@ -722,8 +636,7 @@
       select.innerHTML = '';
       questions.forEach(q => {
         const opt = document.createElement('option');
-        opt.value = q.id;
-        opt.innerText = q.title;
+        opt.value = q.id; opt.innerText = q.title;
         select.appendChild(opt);
       });
     }
@@ -733,7 +646,6 @@
     function loadQuestion(qId) {
       currentQuestion = questions.find(q => q.id === qId) || questions[0];
       if (!currentQuestion) return;
-
       document.getElementById('qTitle').innerText = currentQuestion.title;
       document.getElementById('qDesc').innerHTML = currentQuestion.desc;
       document.getElementById('qDetail').innerHTML = currentQuestion.detail;
@@ -742,18 +654,11 @@
       tbody.innerHTML = '';
       currentQuestion.testCases.forEach(tc => {
         const tr = document.createElement('tr');
-        const inputDisp = tc.rawInput ? tc.rawInput : (tc.inputs ? tc.inputs.join(' ') : '');
-        tr.innerHTML = `
-          <td><div class="input-code-block">${inputDisp}</div></td>
-          <td><strong>${tc.expected}</strong></td>
-          <td style="text-align:left;">${(tc.note || '').replace(/\n/g, '<br>')}</td>
-        `;
+        tr.innerHTML = `<td><div class="input-code-block">${tc.rawInput}</div></td><td><strong>${tc.expected}</strong></td><td style="text-align:left;">${tc.note || ''}</td>`;
         tbody.appendChild(tr);
       });
 
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        MathJax.typesetPromise();
-      }
+      if (window.MathJax && window.MathJax.typesetPromise) MathJax.typesetPromise();
     }
 
     function switchTab(tab) {
@@ -761,22 +666,78 @@
       event.target.classList.add('active');
 
       const blocklyDiv = document.getElementById('blocklyDiv');
-      const codeDisplay = document.getElementById('codeDisplay');
+      const codeContainer = document.getElementById('codeContainer');
 
       if (tab === 'blocks') {
         blocklyDiv.style.display = 'block';
-        codeDisplay.style.display = 'none';
+        codeContainer.style.display = 'none';
         Blockly.svgResize(workspace);
-      } else {
+      } else if (tab === 'javascript') {
         blocklyDiv.style.display = 'none';
-        codeDisplay.style.display = 'block';
+        codeContainer.style.display = 'flex';
+        document.getElementById('jsInputArea').value = getJSGen().workspaceToCode(workspace) || '';
+      }
+    }
 
-        if (tab === 'javascript') codeDisplay.innerText = getJSGen().workspaceToCode(workspace) || '// 無程式碼';
-        else if (tab === 'python') codeDisplay.innerText = getPyGen().workspaceToCode(workspace) || '# 無程式碼';
-        else if (tab === 'xml') {
-          const xmlDom = Blockly.Xml.workspaceToDom(workspace);
-          codeDisplay.innerText = Blockly.Xml.domToPrettyText(xmlDom);
+    /* 🔄 JavaScript 逆向轉為 Blockly 積木核心引擎 */
+    function convertJsToBlockly() {
+      const jsCode = document.getElementById('jsInputArea').value;
+      if (!jsCode.trim()) return alert("請先輸入 JavaScript 程式碼！");
+
+      try {
+        workspace.clear();
+        let xmlList = [];
+        const lines = jsCode.split('\n');
+
+        lines.forEach(line => {
+          line = line.trim();
+          // 1. 轉譯變數宣告 let x = 10; 或 x = 10;
+          if (line.startsWith('let ') || line.includes('=')) {
+            const parts = line.replace('let ', '').replace(';', '').split('=');
+            if (parts.length === 2) {
+              const varName = parts[0].trim();
+              const val = parts[1].trim();
+              const blockXml = `
+                <xml>
+                  <block type="variables_set">
+                    <field name="VAR">${varName}</field>
+                    <value name="VALUE">
+                      <block type="math_number"><field name="NUM">${isNaN(val) ? 0 : val}</field></block>
+                    </value>
+                  </block>
+                </xml>`;
+              xmlList.push(blockXml);
+            }
+          }
+          // 2. 轉譯 alert(...) 輸出積木
+          else if (line.startsWith('alert(')) {
+            const match = line.match(/alert\((.*)\)/);
+            if (match) {
+              const content = match[1].replace(/['"]/g, '');
+              const blockXml = `
+                <xml>
+                  <block type="text_print">
+                    <value name="TEXT">
+                      <block type="text"><field name="TEXT">${content}</field></block>
+                    </value>
+                  </block>
+                </xml>`;
+              xmlList.push(blockXml);
+            }
+          }
+        });
+
+        if (xmlList.length > 0) {
+          const finalXml = `<xml>${xmlList.map(x => x.replace('<xml>', '').replace('</xml>', '')).join('')}</xml>`;
+          const dom = Blockly.Xml.textToDom(finalXml);
+          Blockly.Xml.appendDomToWorkspace(dom, workspace);
+          alert("🎉 成功將 JavaScript 逆向還原為積木！");
+          switchTab('blocks');
+        } else {
+          alert("⚠️ 未能識別對應語法，請確認包含變數宣告或 alert() 輸出");
         }
+      } catch (err) {
+        alert("❌ 逆向轉換失敗：" + err.message);
       }
     }
 
@@ -784,105 +745,67 @@
       document.getElementById('leaderboardModal').style.display = 'flex';
       renderLeaderboard();
     }
-
     function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
 
     function renderLeaderboard() {
       if (isCloudEnabled) {
-        db.ref('leaderboard').on('value', (snapshot) => {
-          displayLeaderboardData(snapshot.val() || {});
+        db.ref('leaderboard').on('value', snap => {
+          const raw = snap.val() || {};
+          const list = Object.keys(raw).map(k => ({ key: k, ...raw[k] }));
+          // 多維度防刷分比序：分數高 ➔ 耗時低 ➔ 積木少 ➔ 時間早
+          list.sort((a, b) => b.score - a.score || a.execTime - b.execTime || a.blockCount - b.blockCount || a.timestamp - b.timestamp);
+
+          const tbody = document.getElementById('leaderboardBody');
+          tbody.innerHTML = list.length ? '' : '<tr><td colspan="7">尚無紀錄</td></tr>';
+          list.forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="${idx < 3 ? 'rank-' + (idx+1) : ''}">${idx+1}</td>
+              <td><strong>${item.name}</strong></td>
+              <td>${item.question}</td>
+              <td><b style="color:var(--primary);">${item.score} 分</b></td>
+              <td>${item.execTime ? item.execTime.toFixed(1) : '-'} ms</td>
+              <td>${item.blockCount || '-'} 個</td>
+              <td><button class="btn btn-danger" style="padding:2px 6px; font-size:11px;" onclick="deleteRecord('${item.key}')">🗑 刪除</button></td>
+            `;
+            tbody.appendChild(tr);
+          });
         });
       }
     }
 
-    /* 🏆 多維度比序邏輯：總分高 ➔ 耗時低 ➔ 積木數低 */
-    function displayLeaderboardData(rawData) {
-      const list = Object.keys(rawData).map(key => ({ key, ...rawData[key] }));
-      
-      list.sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        if (a.execTime !== b.execTime) return (a.execTime || 9999) - (b.execTime || 9999);
-        return (a.blockCount || 9999) - (b.blockCount || 9999);
-      });
+    function deleteRecord(key) { if (isCloudEnabled) db.ref('leaderboard/' + key).remove(); }
+    function clearLeaderboard() { if (isCloudEnabled && confirm("確定清空排行榜？")) db.ref('leaderboard').remove(); }
 
-      const tbody = document.getElementById('leaderboardBody');
-      tbody.innerHTML = '';
-
-      if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">目前尚無成績紀錄</td></tr>';
-        return;
-      }
-
-      list.forEach((item, idx) => {
-        const rank = idx + 1;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="${rank <= 3 ? 'rank-' + rank : ''}">${rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}</td>
-          <td><strong>${item.name}</strong></td>
-          <td>${item.question}</td>
-          <td><span style="color:var(--primary); font-weight:700;">${item.score} 分</span></td>
-          <td><span style="color:#0284c7; font-weight:600;">${item.execTime ? item.execTime.toFixed(1) : '-'} ms</span></td>
-          <td><span style="color:#7c3aed; font-weight:600;">${item.blockCount || '-'} 個</span></td>
-          <td><button class="btn btn-danger" style="padding:2px 6px; font-size:11px;" onclick="deleteRecord('${item.key}')">🗑 刪除</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function deleteRecord(recordKey) {
-      if (confirm("確定要刪除這筆成績紀錄嗎？") && isCloudEnabled) {
-        db.ref('leaderboard/' + recordKey).remove();
-      }
-    }
-
-    function clearLeaderboard() {
-      if (confirm("確定要清空全站排行榜紀錄嗎？") && isCloudEnabled) {
-        db.ref('leaderboard').remove();
-      }
-    }
-
-    /* 🛡️ Web Worker 評測引擎 (精確計算微秒毫秒級耗時) */
+    /* 🛡️ Web Worker 防死迴圈與測速引擎 */
     function executeCodeInWorker(code, inputQueue, timeoutMs = 2500) {
       return new Promise((resolve) => {
         const workerCode = `
           self.onmessage = function(e) {
             const inputs = e.data.inputs || [];
-            let ptr = 0;
-            const outputs = [];
-            
+            let ptr = 0; const outputs = [];
             const window = {
               prompt: function() { return (ptr < inputs.length) ? inputs[ptr++] : "0"; },
               alert: function(msg) { outputs.push(String(msg).trim()); }
             };
-            const prompt = window.prompt;
-            const alert = window.alert;
-
+            const prompt = window.prompt; const alert = window.alert;
             const startTime = performance.now();
             try {
-              const runUserCode = new Function('window', 'prompt', 'alert', e.data.code);
-              runUserCode(window, prompt, alert);
-              const endTime = performance.now();
-              self.postMessage({ success: true, outputs: outputs, execTime: (endTime - startTime) });
-            } catch(err) {
-              self.postMessage({ success: false, error: err.message });
-            }
+              new Function('window', 'prompt', 'alert', e.data.code)(window, prompt, alert);
+              self.postMessage({ success: true, outputs: outputs, execTime: performance.now() - startTime });
+            } catch(err) { self.postMessage({ success: false, error: err.message }); }
           };
         `;
-
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         const worker = new Worker(URL.createObjectURL(blob));
-
         const timer = setTimeout(() => {
           worker.terminate();
-          resolve({ success: false, timeout: true, error: "⏰ 執行超時 (TLE / 疑似無限迴圈)" });
+          resolve({ success: false, timeout: true, error: "⏰ 執行超時 (TLE)" });
         }, timeoutMs);
 
         worker.onmessage = function(e) {
-          clearTimeout(timer);
-          worker.terminate();
-          resolve(e.data);
+          clearTimeout(timer); worker.terminate(); resolve(e.data);
         };
-
         worker.postMessage({ code: code, inputs: inputQueue });
       });
     }
@@ -891,58 +814,43 @@
       if (!currentQuestion) return;
       if (!userName) return openLoginModal();
 
+      // 🛡️ 10 秒評測冷卻機制 (Rate Limiting)
+      const nowTime = Date.now();
+      if (nowTime - lastSubmitTime < 10000) {
+        const waitSec = Math.ceil((10000 - (nowTime - lastSubmitTime)) / 1000);
+        return alert(`⚠️ 為防止刷分，請等待 ${waitSec} 秒後再重新提交！`);
+      }
+
       const btnGrade = document.getElementById('btnGrade');
-      btnGrade.disabled = true;
-      btnGrade.innerText = "⏳ 評測中...";
+      btnGrade.disabled = true; btnGrade.innerText = "⏳ 評測中...";
 
       const code = getJSGen().workspaceToCode(workspace);
-      const blockCount = workspace.getAllBlocks(false).length; // 統計積木總數量
-      let passed = 0;
-      let totalExecTime = 0;
-      let resultMsg = `題目：${currentQuestion.title}\n------------------------\n`;
+      const blockCount = workspace.getAllBlocks(false).length;
+      let passed = 0; let totalExecTime = 0;
 
       for (let i = 0; i < currentQuestion.testCases.length; i++) {
         const tc = currentQuestion.testCases[i];
-        let inputArr = tc.rawInput ? tc.rawInput.trim().split(/\s+/) : (tc.inputs ? tc.inputs.flatMap(s => String(s).trim().split(/\s+/)) : []);
-        
+        let inputArr = tc.rawInput ? tc.rawInput.trim().split(/\s+/) : [];
         const res = await executeCodeInWorker(code, inputArr, 2500);
 
-        if (res.timeout) {
-          resultMsg += `測試點 #${i+1}: 💥 ${res.error}\n`;
-        } else if (res.success) {
+        if (res.success) {
           totalExecTime += (res.execTime || 0);
-          const outputs = res.outputs || [];
-          const isOk = outputs.some(out => out === String(tc.expected).trim() || Number(out) === Number(tc.expected));
+          const isOk = (res.outputs || []).some(out => out === String(tc.expected).trim());
           if (isOk) passed++;
-          resultMsg += `測試點 #${i+1}: ${isOk ? '✅ 通過' : '❌ 失敗'} (耗時: ${(res.execTime || 0).toFixed(1)}ms)\n`;
-        } else {
-          resultMsg += `測試點 #${i+1}: 💥 執行錯誤 (${res.error})\n`;
         }
       }
 
       const totalScore = Math.round((passed / currentQuestion.testCases.length) * 100);
-      const now = new Date();
-      const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-      
-      // 🛡️ 防刷分排行榜最佳成績覆蓋機制
+      lastSubmitTime = Date.now();
+
+      // 🛡️ 防刷分排行榜最佳紀錄覆蓋機制
       if (isCloudEnabled) {
         const lbRef = db.ref('leaderboard');
         const scoreKey = `${userName}_${currentQuestion.id}`.replace(/[.#$\[\]]/g, "_");
 
-        lbRef.child(scoreKey).once('value').then(snapshot => {
-          const oldData = snapshot.val();
-          let shouldUpdate = false;
-
-          if (!oldData) {
-            shouldUpdate = true;
-          } else if (totalScore > oldData.score) {
-            shouldUpdate = true;
-          } else if (totalScore === oldData.score) {
-            // 同分時：耗時更少或積木更少才覆蓋舊紀錄
-            if (totalExecTime < (oldData.execTime || 9999) || blockCount < (oldData.blockCount || 9999)) {
-              shouldUpdate = true;
-            }
-          }
+        lbRef.child(scoreKey).once('value').then(snap => {
+          const old = snap.val();
+          let shouldUpdate = !old || totalScore > old.score || (totalScore === old.score && totalExecTime < old.execTime);
 
           if (shouldUpdate) {
             lbRef.child(scoreKey).set({
@@ -951,41 +859,21 @@
               score: totalScore,
               execTime: totalExecTime,
               blockCount: blockCount,
-              time: timeStr,
               timestamp: Date.now()
             });
           }
         });
       }
 
-      btnGrade.disabled = false;
-      btnGrade.innerText = "▶ 執行評測";
-
-      alert(`${resultMsg}\n總得分: ${totalScore} 分\n總執行耗時: ${totalExecTime.toFixed(1)} ms\n使用積木數: ${blockCount} 個\n（最佳成績已同步更新至排行榜）`);
-    }
-
-    async function runJavaScript() {
-      const code = getJSGen().workspaceToCode(workspace);
-      const res = await executeCodeInWorker(code, [], 2500);
-      if (res.timeout) {
-        alert(res.error);
-      } else if (!res.success) {
-        alert("執行錯誤: " + res.error);
-      } else if (res.outputs && res.outputs.length > 0) {
-        alert("輸出結果：\n" + res.outputs.join('\n'));
-      } else {
-        alert("程式執行完畢 (無輸出)。");
-      }
+      btnGrade.disabled = false; btnGrade.innerText = "▶ 執行評測";
+      alert(`總得分：${totalScore} 分\n總耗時：${totalExecTime.toFixed(1)} ms\n積木數：${blockCount} 個`);
     }
 
     function addTestCaseRow() {
       const div = document.createElement('div');
       div.className = 'test-case-card';
       div.innerHTML = `
-        <div class="form-group">
-          <label>輸入數據：</label>
-          <textarea class="tc-in" rows="2" placeholder="例如：\n3 4"></textarea>
-        </div>
+        <div class="form-group"><label>輸入數據：</label><textarea class="tc-in" rows="2" placeholder="例如：\n3 4"></textarea></div>
         <div class="test-case-row">
           <input type="text" placeholder="期望輸出" class="tc-out" style="flex:1;">
           <input type="text" placeholder="說明 (支援 LaTeX)" class="tc-note" style="flex:2;">
@@ -1028,25 +916,18 @@
 
     function exportXML() {
       const xmlDom = Blockly.Xml.workspaceToDom(workspace);
-      const xmlText = Blockly.Xml.domToPrettyText(xmlDom);
-      const blob = new Blob([xmlText], { type: 'text/xml' });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'willydesiner_blocks.xml';
-      a.click();
+      a.href = URL.createObjectURL(new Blob([Blockly.Xml.domToPrettyText(xmlDom)], { type: 'text/xml' }));
+      a.download = 'willydesiner_blocks.xml'; a.click();
     }
-
     function triggerImportXML() { document.getElementById('xmlFileInput').click(); }
-
-    function importXML(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    function importXML(e) {
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function(evt) {
         workspace.clear();
-        Blockly.Xml.appendDomToWorkspace(Blockly.Xml.textToDom(e.target.result), workspace);
+        Blockly.Xml.appendDomToWorkspace(Blockly.Xml.textToDom(evt.target.result), workspace);
       };
-      reader.readAsText(file);
+      if (e.target.files[0]) reader.readAsText(e.target.files[0]);
     }
 
     window.addEventListener('resize', () => Blockly.svgResize(workspace));

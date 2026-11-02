@@ -153,7 +153,7 @@
       <div class="tab-bar">
         <!-- 🔀 雙積木模式切換按鈕 -->
         <button class="tab-btn active" id="btnBlocklyTab" onclick="setEngineMode('blockly')">🧱 Blockly 經典積木</button>
-        <button class="tab-btn" id="btnScratchTab" onclick="setEngineMode('scratch')">🐱 Scratch 圓角積木</button>
+        <button class="tab-btn" id="btnScratchTab" onclick="setEngineMode('scratch')">🐱 Scratch 經典完整積木</button>
         <button class="tab-btn" onclick="switchTab('javascript')">JavaScript (可逆向)</button>
         <button class="tab-btn" onclick="switchTab('python')">Python</button>
       </div>
@@ -307,29 +307,76 @@
     <category name="函式" custom="PROCEDURE" colour="%{BKY_PROCEDURES_HUE}"></category>
   </xml>
 
-  <!-- 2️⃣ Scratch 完整工具箱 (經典九大色彩模組配置) -->
+  <!-- 2️⃣ Scratch 3.0 經典九大完整工具箱 (全面擴充積木種類) -->
   <xml id="toolbox-scratch" style="display: none">
-    <category name="動作與音效" colour="#FFAB19">
-      <block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">🐱 喵~ Scratch 發聲！</field></shadow></value></block>
-      <block type="text_prompt_ext"><value name="TEXT"><shadow type="text"><field name="TEXT">請輸入數據</field></shadow></value></block>
+    <!-- 外觀 (Looks) - 紫藍色 -->
+    <category name="外觀 (Looks)" colour="#9966FF">
+      <block type="text_print">
+        <value name="TEXT">
+          <shadow type="text">
+            <field name="TEXT">🐱 說出 Hello!</field>
+          </shadow>
+        </value>
+      </block>
     </category>
-    <category name="控制 (Control)" colour="#FFBF00">
-      <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
+
+    <!-- 偵測 (Sensing) - 天藍色 -->
+    <category name="偵測與輸入 (Sensing)" colour="#5CB1D6">
+      <block type="text_prompt_ext">
+        <value name="TEXT">
+          <shadow type="text">
+            <field name="TEXT">詢問：請輸入數據？</field>
+          </shadow>
+        </value>
+      </block>
+    </category>
+
+    <!-- 控制 (Control) - 橙黃色 -->
+    <category name="控制 (Control)" colour="#FFAB19">
+      <block type="controls_repeat_ext">
+        <value name="TIMES">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+      </block>
       <block type="controls_whileUntil"></block>
       <block type="controls_if"></block>
+      <block type="controls_flow_statements"></block>
     </category>
-    <category name="運算與數學" colour="#40BF4A">
+
+    <!-- 運算 (Operators) - 綠色 (包含開根號、三角函數、字串與隨機數) -->
+    <category name="運算 (Operators)" colour="#59C059">
       <block type="math_number"><field name="NUM">0</field></block>
       <block type="math_arithmetic"></block>
+      <!-- 開根號 sqrt、絕對值 abs、ln 等 -->
       <block type="math_single"><field name="OP">ROOT</field></block>
       <block type="math_trig"><field name="OP">SIN</field></block>
-      <block type="math_random_int"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
+      <!-- 隨機數生成 -->
+      <block type="math_random_int">
+        <value name="FROM">
+          <shadow type="math_number"><field name="NUM">1</field></shadow>
+        </value>
+        <value name="TO">
+          <shadow type="math_number"><field name="NUM">100</field></shadow>
+        </value>
+      </block>
+      <block type="math_round"></block>
+      <block type="math_modulo"></block>
       <block type="logic_compare"></block>
       <block type="logic_operation"></block>
       <block type="logic_negate"></block>
+      <!-- 字串運算 -->
+      <block type="text"></block>
+      <block type="text_join"></block>
+      <block type="text_length"></block>
     </category>
+
+    <!-- 變數 (Variables) - 橘色 -->
     <category name="變數 (Variables)" custom="VARIABLE" colour="#FF8C1A"></category>
-    <category name="自訂積木" custom="PROCEDURE" colour="#FF6680"></category>
+
+    <!-- 自訂積木 (My Blocks) - 粉紅色 -->
+    <category name="自訂積木 (My Blocks)" custom="PROCEDURE" colour="#FF6680"></category>
   </xml>
 
   <script>
@@ -349,7 +396,7 @@
     let userId = localStorage.getItem('willydesiner_uid') || 'user_' + Math.random().toString(36).substr(2, 9);
     let userName = localStorage.getItem('willydesiner_uname') || '';
     let lastSubmitTime = 0;
-    let currentMode = 'blockly'; // 預設模式：'blockly' 或 'scratch'
+    let currentMode = 'blockly';
     let workspace = null;
 
     localStorage.setItem('willydesiner_uid', userId);
@@ -373,7 +420,6 @@
     let questions = [];
     let currentQuestion = null;
 
-    // 🔀 切換 Blockly 與 Scratch 兩種積木引擎
     function setEngineMode(mode) {
       currentMode = mode;
       
@@ -865,7 +911,6 @@
 
     window.addEventListener('resize', () => { if (workspace) Blockly.svgResize(workspace); });
     
-    // 初始化雙積木模式中的預設 Blockly 工作區
     setEngineMode('blockly');
     initQuestions();
     initUserTracker();

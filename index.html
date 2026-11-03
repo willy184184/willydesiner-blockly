@@ -3,25 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>willydesiner - 原生 Scratch 3.0 雲端評測平台</title>
+  <title>willydesiner - Blockly & Scratch 雙引擎線上評測平台</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- 🐱 載入 MIT 官方 Scratch 3.0 原生 Blocks 引擎與樣式 -->
-  <link rel="stylesheet" href="https://unpkg.com/scratch-blocks/media/scratch-blocks.css">
-  <script src="https://unpkg.com/scratch-blocks/blockly_compressed_vertical.js"></script>
-  <script src="https://unpkg.com/scratch-blocks/blocks_compressed.js"></script>
-  <script src="https://unpkg.com/scratch-blocks/blocks_compressed_vertical.js"></script>
-  <script src="https://unpkg.com/scratch-blocks/msg/messages.js"></script>
+  <!-- Blockly 核心與轉譯器 CDN (穩定版) -->
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
   <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/msg/zh-hant.js"></script>
+
+  <!-- Scratch 經典主題與圓角樣式 CDN -->
+  <script src="https://unpkg.com/@blockly/theme-scratchblocks"></script>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <!-- MathJax 3.0 -->
+  <!-- MathJax 3.0 (LaTeX 渲染) -->
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -34,7 +35,6 @@
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
-      --scratch-orange: #FFAB19;
       --bg-main: #f8fafc;
       --bg-card: #ffffff;
       --text-main: #0f172a;
@@ -88,7 +88,8 @@
     .tab-bar { display: flex; gap: 6px; margin-bottom: 8px; }
     .tab-btn { padding: 7px 16px; border: 1px solid transparent; background: transparent; cursor: pointer; border-radius: 6px; font-weight: 500; color: var(--text-muted); transition: all 0.2s; }
     .tab-btn:hover { background: #e2e8f0; color: var(--text-main); }
-    .tab-btn.active { background: #fff8e1; color: #d97706; font-weight: 600; border-color: #fcd34d; box-shadow: var(--shadow-sm); }
+    .tab-btn.active-blockly { background: var(--primary); color: white; font-weight: 600; border-radius: 6px; }
+    .tab-btn.active-scratch { background: #FFAB19; color: white; font-weight: 600; border-radius: 6px; }
 
     .editor-container { flex: 1; position: relative; border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
     #blocklyDiv { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
@@ -128,7 +129,7 @@
   <!-- 頂部選單 -->
   <div class="top-menu">
     <div class="btn-group">
-      <span class="brand-title">willydesiner 🐱 Scratch 3.0</span>
+      <span class="brand-title">willydesiner 🧩</span>
       <button class="btn" onclick="triggerImportXML()">📂 開啟檔案</button>
       <button class="btn" onclick="exportXML()">💾 儲存積木</button>
       <button class="btn" onclick="runJavaScript()">⚡ 執行程式</button>
@@ -149,8 +150,10 @@
   <div class="main-wrapper">
     <div class="left-area">
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('blocks')">🐱 Scratch 3.0 原生積木工作區</button>
-        <button class="tab-btn" onclick="switchTab('javascript')">JavaScript (可逆向)</button>
+        <!-- 🔀 切換雙積木種類的核心頁籤 -->
+        <button class="tab-btn active-blockly" id="tabBlockly" onclick="switchEngine('blockly')">🧱 Blockly 專業模式</button>
+        <button class="tab-btn" id="tabScratch" onclick="switchEngine('scratch')">🐱 Scratch 經典模式</button>
+        <button class="tab-btn" id="tabJS" onclick="switchTab('javascript')">JavaScript (可逆向)</button>
       </div>
       <div class="editor-container">
         <div id="blocklyDiv"></div>
@@ -265,94 +268,83 @@
     </div>
   </div>
 
-  <!-- 🐱 Scratch 3.0 原生標準分類工具箱 (Scratch Blocks XML) -->
-  <xml id="toolbox" style="display: none">
-    <category name="事件 (Events)" colour="#FFBF00" secondaryColour="#E6AC00">
-      <block type="event_whenflagclicked"></block>
+  <!-- 🧱 1. Blockly 工具箱 XML -->
+  <xml id="toolbox-blockly" style="display: none">
+    <category name="專用 IO" colour="#ff0000">
+      <block type="text_print"></block>
+      <block type="text_prompt_ext"><value name="TEXT"><shadow type="text"><field name="TEXT">請輸入數據</field></shadow></value></block>
     </category>
+    <category name="邏輯" colour="%{BKY_LOGIC_HUE}">
+      <block type="controls_if"></block>
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+      <block type="logic_boolean"></block>
+    </category>
+    <category name="迴圈" colour="%{BKY_LOOPS_HUE}">
+      <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
+      <block type="controls_whileUntil"></block>
+      <block type="controls_for"></block>
+    </category>
+    <category name="數學與開根號" colour="%{BKY_MATH_HUE}">
+      <block type="math_number"><field name="NUM">0</field></block>
+      <block type="math_arithmetic"></block>
+      <block type="math_single"><field name="OP">ROOT</field></block>
+      <block type="math_trig"><field name="OP">SIN</field></block>
+      <block type="math_constant"><field name="CONSTANT">PI</field></block>
+      <block type="math_round"></block>
+      <block type="math_modulo"></block>
+      <block type="math_random_int"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
+    </category>
+    <category name="文字" colour="%{BKY_TEXTS_HUE}">
+      <block type="text"></block>
+      <block type="text_join"></block>
+      <block type="text_length"></block>
+    </category>
+    <category name="變數" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}"></category>
+  </xml>
 
-    <category name="控制 (Control)" colour="#FFAB19" secondaryColour="#CF8B17">
-      <block type="control_repeat">
-        <value name="TIMES">
-          <shadow type="math_whole_number"><field name="NUM">10</field></shadow>
+  <!-- 🐱 2. Scratch 工具箱 XML (比照 Scratch 3.0 九大色彩分類) -->
+  <xml id="toolbox-scratch" style="display: none">
+    <category name="外觀 (Looks)" colour="#9966FF">
+      <block type="text_print">
+        <value name="TEXT">
+          <shadow type="text"><field name="TEXT">🐱 說出 Hello Scratch!</field></shadow>
         </value>
       </block>
-      <block type="control_forever"></block>
-      <block type="control_if"></block>
-      <block type="control_if_else"></block>
-      <block type="control_wait">
-        <value name="DURATION">
-          <shadow type="math_positive_number"><field name="NUM">1</field></shadow>
+    </category>
+    <category name="偵測 (Sensing)" colour="#5CB1D6">
+      <block type="text_prompt_ext">
+        <value name="TEXT">
+          <shadow type="text"><field name="TEXT">詢問：請輸入數據？</field></shadow>
         </value>
       </block>
     </category>
-
-    <category name="運算 (Operators)" colour="#40BF4A" secondaryColour="#38A740">
-      <block type="operator_add">
-        <value name="NUM1"><shadow type="math_number"><field name="NUM"></field></shadow></value>
-        <value name="NUM2"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+    <category name="控制 (Control)" colour="#FFAB19">
+      <block type="controls_repeat_ext">
+        <value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
       </block>
-      <block type="operator_subtract">
-        <value name="NUM1"><shadow type="math_number"><field name="NUM"></field></shadow></value>
-        <value name="NUM2"><shadow type="math_number"><field name="NUM"></field></shadow></value>
-      </block>
-      <block type="operator_multiply">
-        <value name="NUM1"><shadow type="math_number"><field name="NUM"></field></shadow></value>
-        <value name="NUM2"><shadow type="math_number"><field name="NUM"></field></shadow></value>
-      </block>
-      <block type="operator_divide">
-        <value name="NUM1"><shadow type="math_number"><field name="NUM"></field></shadow></value>
-        <value name="NUM2"><shadow type="math_number"><field name="NUM"></field></shadow></value>
-      </block>
-      <block type="operator_random">
+      <block type="controls_whileUntil"></block>
+      <block type="controls_if"></block>
+    </category>
+    <category name="運算 (Operators)" colour="#59C059">
+      <block type="math_number"><field name="NUM">0</field></block>
+      <block type="math_arithmetic"></block>
+      <block type="math_single"><field name="OP">ROOT</field></block>
+      <block type="math_trig"><field name="OP">SIN</field></block>
+      <block type="math_random_int">
         <value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
-        <value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+        <value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
       </block>
-      <block type="operator_gt">
-        <value name="OPERAND1"><shadow type="text"><field name="TEXT"></field></shadow></value>
-        <value name="OPERAND2"><shadow type="text"><field name="TEXT">50</field></shadow></value>
-      </block>
-      <block type="operator_lt">
-        <value name="OPERAND1"><shadow type="text"><field name="TEXT"></field></shadow></value>
-        <value name="OPERAND2"><shadow type="text"><field name="TEXT">50</field></shadow></value>
-      </block>
-      <block type="operator_equals">
-        <value name="OPERAND1"><shadow type="text"><field name="TEXT"></field></shadow></value>
-        <value name="OPERAND2"><shadow type="text"><field name="TEXT">50</field></shadow></value>
-      </block>
-      <block type="operator_and"></block>
-      <block type="operator_or"></block>
-      <block type="operator_not"></block>
-      <block type="operator_mathop">
-        <field name="OPERATOR">sqrt</field>
-        <value name="NUM"><shadow type="math_number"><field name="NUM">9</field></shadow></value>
-      </block>
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
     </category>
-
-    <category name="外觀與輸出 (Looks)" colour="#9966FF" secondaryColour="#8552E6">
-      <block type="looks_say">
-        <value name="MESSAGE">
-          <shadow type="text"><field name="TEXT">Hello Scratch!</field></shadow>
-        </value>
-      </block>
-    </category>
-
-    <category name="偵測與輸入 (Sensing)" colour="#5CB1D6" secondaryColour="#47A0C7">
-      <block type="sensing_askandwait">
-        <value name="QUESTION">
-          <shadow type="text"><field name="TEXT">請輸入數據？</field></shadow>
-        </value>
-      </block>
-      <block type="sensing_answer"></block>
-    </category>
-
-    <category name="變數 (Variables)" colour="#FF8C1A" secondaryColour="#DB7412" custom="VARIABLE"></category>
+    <category name="變數 (Variables)" custom="VARIABLE" colour="#FF8C1A"></category>
   </xml>
 
   <script>
     const ADMIN_PASSWORD = "Admin#9ay184184!Key";
     const firebaseConfig = {
-      apiKey: "AIzaSyCRH40ZJTAyZyGQEneE0FH9mb2RDKNutBs",
+       apiKey: "AIzaSyCRH40ZJTAyZyGQEneE0FH9mb2RDKNutBs",
   authDomain: "gay184184.firebaseapp.com",
   projectId: "gay184184",
   storageBucket: "gay184184.firebasestorage.app",
@@ -366,6 +358,7 @@
     let userId = localStorage.getItem('willydesiner_uid') || 'user_' + Math.random().toString(36).substr(2, 9);
     let userName = localStorage.getItem('willydesiner_uname') || '';
     let lastSubmitTime = 0;
+    let currentEngine = 'blockly';
     let workspace = null;
 
     localStorage.setItem('willydesiner_uid', userId);
@@ -389,20 +382,47 @@
     let questions = [];
     let currentQuestion = null;
 
-    // 🐱 初始化原生 Scratch 3.0 工作區 (Scratch Blocks 引擎)
-    function initScratchWorkspace() {
-      workspace = Blockly.inject('blocklyDiv', {
-        toolbox: document.getElementById('toolbox'),
-        media: 'https://unpkg.com/scratch-blocks/media/',
-        zoom: { controls: true, wheel: true, startScale: 0.75, maxScale: 2, minScale: 0.4, scaleSpeed: 1.1 },
-        colours: {
-          workspace: '#F9F9F9',
-          flyout: '#F0F0F0',
-          scrollbar: '#CECECE',
-          scrollbarHover: '#B0B0B0',
-          insertedControl: '#000000'
-        }
-      });
+    // 🔀 核心功能：動態切換 Blockly / Scratch 雙引擎
+    function switchEngine(mode) {
+      currentEngine = mode;
+      
+      const tabBlockly = document.getElementById('tabBlockly');
+      const tabScratch = document.getElementById('tabScratch');
+      const tabJS = document.getElementById('tabJS');
+
+      tabBlockly.className = mode === 'blockly' ? 'tab-btn active-blockly' : 'tab-btn';
+      tabScratch.className = mode === 'scratch' ? 'tab-btn active-scratch' : 'tab-btn';
+      tabJS.className = 'tab-btn';
+
+      const toolboxId = mode === 'scratch' ? 'toolbox-scratch' : 'toolbox-blockly';
+      const themeObj = (mode === 'scratch' && typeof Blockly.Themes !== 'undefined' && Blockly.Themes.Scratch) 
+                       ? Blockly.Themes.Scratch : null;
+
+      initWorkspace(toolboxId, themeObj);
+      switchTab('blocks');
+    }
+
+    function initWorkspace(toolboxId, themeObj) {
+      let xmlDom = null;
+      if (workspace) {
+        try { xmlDom = Blockly.Xml.workspaceToDom(workspace); } catch(e){}
+        workspace.dispose();
+      }
+
+      const options = {
+        toolbox: document.getElementById(toolboxId),
+        scrollbars: true,
+        grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
+        zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
+      };
+
+      if (themeObj) options.theme = themeObj;
+
+      workspace = Blockly.inject('blocklyDiv', options);
+
+      if (xmlDom) {
+        try { Blockly.Xml.appendDomToWorkspace(xmlDom, workspace); } catch(e){}
+      }
     }
 
     function getJSGen() { return (typeof javascript !== 'undefined' && javascript.javascriptGenerator) ? javascript.javascriptGenerator : Blockly.JavaScript; }
@@ -586,9 +606,6 @@
     }
 
     function switchTab(tab) {
-      document.querySelectorAll('.left-area .tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-
       const blocklyDiv = document.getElementById('blocklyDiv');
       const codeContainer = document.getElementById('codeContainer');
 
@@ -621,10 +638,10 @@
               const val = parts[1].trim();
               const blockXml = `
                 <xml>
-                  <block type="data_setvariableto">
-                    <field name="VARIABLE">${varName}</field>
+                  <block type="variables_set">
+                    <field name="VAR">${varName}</field>
                     <value name="VALUE">
-                      <shadow type="math_number"><field name="NUM">${isNaN(val) ? 0 : val}</field></shadow>
+                      <block type="math_number"><field name="NUM">${isNaN(val) ? 0 : val}</field></block>
                     </value>
                   </block>
                 </xml>`;
@@ -637,9 +654,9 @@
               const content = match[1].replace(/['"]/g, '');
               const blockXml = `
                 <xml>
-                  <block type="looks_say">
-                    <value name="MESSAGE">
-                      <shadow type="text"><field name="TEXT">${content}</field></shadow>
+                  <block type="text_print">
+                    <value name="TEXT">
+                      <block type="text"><field name="TEXT">${content}</field></block>
                     </value>
                   </block>
                 </xml>`;
@@ -652,7 +669,7 @@
           const finalXml = `<xml>${xmlList.map(x => x.replace('<xml>', '').replace('</xml>', '')).join('')}</xml>`;
           const dom = Blockly.Xml.textToDom(finalXml);
           Blockly.Xml.appendDomToWorkspace(dom, workspace);
-          alert("🎉 成功將 JavaScript 逆向還原為 Scratch 積木！");
+          alert("🎉 成功將 JavaScript 逆向還原為積木！");
           switchTab('blocks');
         } else {
           alert("⚠️ 未能識別對應語法，請確認包含變數宣告或 alert() 輸出");
@@ -849,7 +866,8 @@
 
     window.addEventListener('resize', () => { if (workspace) Blockly.svgResize(workspace); });
     
-    initScratchWorkspace();
+    // 預設以 Blockly 模式啟動
+    switchEngine('blockly');
     initQuestions();
     initUserTracker();
   </script>

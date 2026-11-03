@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>willydesiner - Blockly & Scratch 雙積木評測平台</title>
+  <title>willydesiner - 原生 Scratch 3.0 雲端評測平台</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Blockly 核心與轉譯器 CDN -->
-  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <!-- 🐱 載入 MIT 官方 Scratch 3.0 原生 Blocks 引擎與樣式 -->
+  <link rel="stylesheet" href="https://unpkg.com/scratch-blocks/media/scratch-blocks.css">
+  <script src="https://unpkg.com/scratch-blocks/blockly_compressed_vertical.js"></script>
+  <script src="https://unpkg.com/scratch-blocks/blocks_compressed.js"></script>
+  <script src="https://unpkg.com/scratch-blocks/blocks_compressed_vertical.js"></script>
+  <script src="https://unpkg.com/scratch-blocks/msg/messages.js"></script>
   <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
-  <script src="https://unpkg.com/blockly/python_compressed.js"></script>
-  <script src="https://unpkg.com/blockly/msg/zh-hant.js"></script>
-  
-  <!-- Scratch 主題 CDN -->
-  <script src="https://unpkg.com/@blockly/theme-scratchblocks"></script>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -35,7 +34,7 @@
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
-      --scratch-color: #FFAB19;
+      --scratch-orange: #FFAB19;
       --bg-main: #f8fafc;
       --bg-card: #ffffff;
       --text-main: #0f172a;
@@ -89,8 +88,7 @@
     .tab-bar { display: flex; gap: 6px; margin-bottom: 8px; }
     .tab-btn { padding: 7px 16px; border: 1px solid transparent; background: transparent; cursor: pointer; border-radius: 6px; font-weight: 500; color: var(--text-muted); transition: all 0.2s; }
     .tab-btn:hover { background: #e2e8f0; color: var(--text-main); }
-    .tab-btn.active { background: var(--bg-card); color: var(--primary); font-weight: 600; border-color: var(--border-color); box-shadow: var(--shadow-sm); }
-    .tab-btn.scratch-active { background: #fff8e1; color: #d97706; font-weight: 600; border-color: #fcd34d; }
+    .tab-btn.active { background: #fff8e1; color: #d97706; font-weight: 600; border-color: #fcd34d; box-shadow: var(--shadow-sm); }
 
     .editor-container { flex: 1; position: relative; border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
     #blocklyDiv { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
@@ -130,7 +128,7 @@
   <!-- 頂部選單 -->
   <div class="top-menu">
     <div class="btn-group">
-      <span class="brand-title">willydesiner 🧩</span>
+      <span class="brand-title">willydesiner 🐱 Scratch 3.0</span>
       <button class="btn" onclick="triggerImportXML()">📂 開啟檔案</button>
       <button class="btn" onclick="exportXML()">💾 儲存積木</button>
       <button class="btn" onclick="runJavaScript()">⚡ 執行程式</button>
@@ -151,11 +149,8 @@
   <div class="main-wrapper">
     <div class="left-area">
       <div class="tab-bar">
-        <!-- 🔀 雙積木模式切換按鈕 -->
-        <button class="tab-btn active" id="btnBlocklyTab" onclick="setEngineMode('blockly')">🧱 Blockly 經典積木</button>
-        <button class="tab-btn" id="btnScratchTab" onclick="setEngineMode('scratch')">🐱 Scratch 經典完整積木</button>
+        <button class="tab-btn active" onclick="switchTab('blocks')">🐱 Scratch 3.0 原生積木工作區</button>
         <button class="tab-btn" onclick="switchTab('javascript')">JavaScript (可逆向)</button>
-        <button class="tab-btn" onclick="switchTab('python')">Python</button>
       </div>
       <div class="editor-container">
         <div id="blocklyDiv"></div>
@@ -270,113 +265,88 @@
     </div>
   </div>
 
-  <!-- 1️⃣ Blockly 完整工具箱 -->
-  <xml id="toolbox-blockly" style="display: none">
-    <category name="輸入與輸出" colour="#ff0000">
-      <block type="text_print"></block>
-      <block type="text_prompt_ext"><value name="TEXT"><shadow type="text"><field name="TEXT">請輸入數據</field></shadow></value></block>
-    </category>
-    <category name="邏輯" colour="%{BKY_LOGIC_HUE}">
-      <block type="controls_if"></block>
-      <block type="logic_compare"></block>
-      <block type="logic_operation"></block>
-      <block type="logic_boolean"></block>
-      <block type="logic_negate"></block>
-    </category>
-    <category name="迴圈" colour="%{BKY_LOOPS_HUE}">
-      <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
-      <block type="controls_whileUntil"></block>
-      <block type="controls_for"></block>
-    </category>
-    <category name="高階數學" colour="%{BKY_MATH_HUE}">
-      <block type="math_number"><field name="NUM">0</field></block>
-      <block type="math_arithmetic"></block>
-      <block type="math_single"><field name="OP">ROOT</field></block>
-      <block type="math_trig"><field name="OP">SIN</field></block>
-      <block type="math_constant"><field name="CONSTANT">PI</field></block>
-      <block type="math_round"></block>
-      <block type="math_modulo"></block>
-      <block type="math_random_int"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
-    </category>
-    <category name="文字" colour="%{BKY_TEXTS_HUE}">
-      <block type="text"></block>
-      <block type="text_join"></block>
-      <block type="text_length"></block>
-    </category>
-    <category name="變數" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}"></category>
-    <category name="函式" custom="PROCEDURE" colour="%{BKY_PROCEDURES_HUE}"></category>
-  </xml>
-
-  <!-- 2️⃣ Scratch 3.0 經典九大完整工具箱 (全面擴充積木種類) -->
-  <xml id="toolbox-scratch" style="display: none">
-    <!-- 外觀 (Looks) - 紫藍色 -->
-    <category name="外觀 (Looks)" colour="#9966FF">
-      <block type="text_print">
-        <value name="TEXT">
-          <shadow type="text">
-            <field name="TEXT">🐱 說出 Hello!</field>
-          </shadow>
-        </value>
-      </block>
+  <!-- 🐱 Scratch 3.0 原生標準分類工具箱 (Scratch Blocks XML) -->
+  <xml id="toolbox" style="display: none">
+    <category name="事件 (Events)" colour="#FFBF00" secondaryColour="#E6AC00">
+      <block type="event_whenflagclicked"></block>
     </category>
 
-    <!-- 偵測 (Sensing) - 天藍色 -->
-    <category name="偵測與輸入 (Sensing)" colour="#5CB1D6">
-      <block type="text_prompt_ext">
-        <value name="TEXT">
-          <shadow type="text">
-            <field name="TEXT">詢問：請輸入數據？</field>
-          </shadow>
-        </value>
-      </block>
-    </category>
-
-    <!-- 控制 (Control) - 橙黃色 -->
-    <category name="控制 (Control)" colour="#FFAB19">
-      <block type="controls_repeat_ext">
+    <category name="控制 (Control)" colour="#FFAB19" secondaryColour="#CF8B17">
+      <block type="control_repeat">
         <value name="TIMES">
-          <shadow type="math_number">
-            <field name="NUM">10</field>
-          </shadow>
+          <shadow type="math_whole_number"><field name="NUM">10</field></shadow>
         </value>
       </block>
-      <block type="controls_whileUntil"></block>
-      <block type="controls_if"></block>
-      <block type="controls_flow_statements"></block>
-    </category>
-
-    <!-- 運算 (Operators) - 綠色 (包含開根號、三角函數、字串與隨機數) -->
-    <category name="運算 (Operators)" colour="#59C059">
-      <block type="math_number"><field name="NUM">0</field></block>
-      <block type="math_arithmetic"></block>
-      <!-- 開根號 sqrt、絕對值 abs、ln 等 -->
-      <block type="math_single"><field name="OP">ROOT</field></block>
-      <block type="math_trig"><field name="OP">SIN</field></block>
-      <!-- 隨機數生成 -->
-      <block type="math_random_int">
-        <value name="FROM">
-          <shadow type="math_number"><field name="NUM">1</field></shadow>
-        </value>
-        <value name="TO">
-          <shadow type="math_number"><field name="NUM">100</field></shadow>
+      <block type="control_forever"></block>
+      <block type="control_if"></block>
+      <block type="control_if_else"></block>
+      <block type="control_wait">
+        <value name="DURATION">
+          <shadow type="math_positive_number"><field name="NUM">1</field></shadow>
         </value>
       </block>
-      <block type="math_round"></block>
-      <block type="math_modulo"></block>
-      <block type="logic_compare"></block>
-      <block type="logic_operation"></block>
-      <block type="logic_negate"></block>
-      <!-- 字串運算 -->
-      <block type="text"></block>
-      <block type="text_join"></block>
-      <block type="text_length"></block>
     </category>
 
-    <!-- 變數 (Variables) - 橘色 -->
-    <category name="變數 (Variables)" custom="VARIABLE" colour="#FF8C1A"></category>
+    <category name="運算 (Operators)" colour="#40BF4A" secondaryColour="#38A740">
+      <block type="operator_add">
+        <value name="NUM1"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+        <value name="NUM2"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+      </block>
+      <block type="operator_subtract">
+        <value name="NUM1"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+        <value name="NUM2"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+      </block>
+      <block type="operator_multiply">
+        <value name="NUM1"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+        <value name="NUM2"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+      </block>
+      <block type="operator_divide">
+        <value name="NUM1"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+        <value name="NUM2"><shadow type="math_number"><field name="NUM"></field></shadow></value>
+      </block>
+      <block type="operator_random">
+        <value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+        <value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+      </block>
+      <block type="operator_gt">
+        <value name="OPERAND1"><shadow type="text"><field name="TEXT"></field></shadow></value>
+        <value name="OPERAND2"><shadow type="text"><field name="TEXT">50</field></shadow></value>
+      </block>
+      <block type="operator_lt">
+        <value name="OPERAND1"><shadow type="text"><field name="TEXT"></field></shadow></value>
+        <value name="OPERAND2"><shadow type="text"><field name="TEXT">50</field></shadow></value>
+      </block>
+      <block type="operator_equals">
+        <value name="OPERAND1"><shadow type="text"><field name="TEXT"></field></shadow></value>
+        <value name="OPERAND2"><shadow type="text"><field name="TEXT">50</field></shadow></value>
+      </block>
+      <block type="operator_and"></block>
+      <block type="operator_or"></block>
+      <block type="operator_not"></block>
+      <block type="operator_mathop">
+        <field name="OPERATOR">sqrt</field>
+        <value name="NUM"><shadow type="math_number"><field name="NUM">9</field></shadow></value>
+      </block>
+    </category>
 
-    <!-- 自訂積木 (My Blocks) - 粉紅色 -->
-    <category name="自訂積木 (My Blocks)" custom="PROCEDURE" colour="#FF6680"></category>
+    <category name="外觀與輸出 (Looks)" colour="#9966FF" secondaryColour="#8552E6">
+      <block type="looks_say">
+        <value name="MESSAGE">
+          <shadow type="text"><field name="TEXT">Hello Scratch!</field></shadow>
+        </value>
+      </block>
+    </category>
+
+    <category name="偵測與輸入 (Sensing)" colour="#5CB1D6" secondaryColour="#47A0C7">
+      <block type="sensing_askandwait">
+        <value name="QUESTION">
+          <shadow type="text"><field name="TEXT">請輸入數據？</field></shadow>
+        </value>
+      </block>
+      <block type="sensing_answer"></block>
+    </category>
+
+    <category name="變數 (Variables)" colour="#FF8C1A" secondaryColour="#DB7412" custom="VARIABLE"></category>
   </xml>
 
   <script>
@@ -396,7 +366,6 @@
     let userId = localStorage.getItem('willydesiner_uid') || 'user_' + Math.random().toString(36).substr(2, 9);
     let userName = localStorage.getItem('willydesiner_uname') || '';
     let lastSubmitTime = 0;
-    let currentMode = 'blockly';
     let workspace = null;
 
     localStorage.setItem('willydesiner_uid', userId);
@@ -420,46 +389,20 @@
     let questions = [];
     let currentQuestion = null;
 
-    function setEngineMode(mode) {
-      currentMode = mode;
-      
-      const btnBlockly = document.getElementById('btnBlocklyTab');
-      const btnScratch = document.getElementById('btnScratchTab');
-
-      if (mode === 'scratch') {
-        btnBlockly.className = 'tab-btn';
-        btnScratch.className = 'tab-btn scratch-active';
-        initWorkspace('toolbox-scratch', Blockly.Themes.Scratch);
-      } else {
-        btnBlockly.className = 'tab-btn active';
-        btnScratch.className = 'tab-btn';
-        initWorkspace('toolbox-blockly', null);
-      }
-
-      switchTab('blocks');
-    }
-
-    function initWorkspace(toolboxId, themeObj) {
-      let currentXml = null;
-      if (workspace) {
-        currentXml = Blockly.Xml.workspaceToDom(workspace);
-        workspace.dispose();
-      }
-
-      const options = {
-        toolbox: document.getElementById(toolboxId),
-        scrollbars: true,
-        grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
-        zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
-      };
-
-      if (themeObj) options.theme = themeObj;
-
-      workspace = Blockly.inject('blocklyDiv', options);
-
-      if (currentXml) {
-        Blockly.Xml.appendDomToWorkspace(currentXml, workspace);
-      }
+    // 🐱 初始化原生 Scratch 3.0 工作區 (Scratch Blocks 引擎)
+    function initScratchWorkspace() {
+      workspace = Blockly.inject('blocklyDiv', {
+        toolbox: document.getElementById('toolbox'),
+        media: 'https://unpkg.com/scratch-blocks/media/',
+        zoom: { controls: true, wheel: true, startScale: 0.75, maxScale: 2, minScale: 0.4, scaleSpeed: 1.1 },
+        colours: {
+          workspace: '#F9F9F9',
+          flyout: '#F0F0F0',
+          scrollbar: '#CECECE',
+          scrollbarHover: '#B0B0B0',
+          insertedControl: '#000000'
+        }
+      });
     }
 
     function getJSGen() { return (typeof javascript !== 'undefined' && javascript.javascriptGenerator) ? javascript.javascriptGenerator : Blockly.JavaScript; }
@@ -644,12 +587,7 @@
 
     function switchTab(tab) {
       document.querySelectorAll('.left-area .tab-btn').forEach(btn => btn.classList.remove('active'));
-      if (tab === 'blocks') {
-        if (currentMode === 'scratch') document.getElementById('btnScratchTab').classList.add('scratch-active');
-        else document.getElementById('btnBlocklyTab').classList.add('active');
-      } else {
-        event.target.classList.add('active');
-      }
+      event.target.classList.add('active');
 
       const blocklyDiv = document.getElementById('blocklyDiv');
       const codeContainer = document.getElementById('codeContainer');
@@ -683,10 +621,10 @@
               const val = parts[1].trim();
               const blockXml = `
                 <xml>
-                  <block type="variables_set">
-                    <field name="VAR">${varName}</field>
+                  <block type="data_setvariableto">
+                    <field name="VARIABLE">${varName}</field>
                     <value name="VALUE">
-                      <block type="math_number"><field name="NUM">${isNaN(val) ? 0 : val}</field></block>
+                      <shadow type="math_number"><field name="NUM">${isNaN(val) ? 0 : val}</field></shadow>
                     </value>
                   </block>
                 </xml>`;
@@ -699,9 +637,9 @@
               const content = match[1].replace(/['"]/g, '');
               const blockXml = `
                 <xml>
-                  <block type="text_print">
-                    <value name="TEXT">
-                      <block type="text"><field name="TEXT">${content}</field></block>
+                  <block type="looks_say">
+                    <value name="MESSAGE">
+                      <shadow type="text"><field name="TEXT">${content}</field></shadow>
                     </value>
                   </block>
                 </xml>`;
@@ -714,7 +652,7 @@
           const finalXml = `<xml>${xmlList.map(x => x.replace('<xml>', '').replace('</xml>', '')).join('')}</xml>`;
           const dom = Blockly.Xml.textToDom(finalXml);
           Blockly.Xml.appendDomToWorkspace(dom, workspace);
-          alert("🎉 成功將 JavaScript 逆向還原為積木！");
+          alert("🎉 成功將 JavaScript 逆向還原為 Scratch 積木！");
           switchTab('blocks');
         } else {
           alert("⚠️ 未能識別對應語法，請確認包含變數宣告或 alert() 輸出");
@@ -911,7 +849,7 @@
 
     window.addEventListener('resize', () => { if (workspace) Blockly.svgResize(workspace); });
     
-    setEngineMode('blockly');
+    initScratchWorkspace();
     initQuestions();
     initUserTracker();
   </script>

@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>willydesiner - Blockly 雲端評測平台</title>
+  <title>willydesiner - Blockly & Scratch 雙系統評測平台</title>
   
+  <!-- 字型 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,11 +16,14 @@
   <script src="https://unpkg.com/blockly/python_compressed.js"></script>
   <script src="https://unpkg.com/blockly/msg/zh-hant.js"></script>
 
+  <!-- Scratch 主題外觀 CDN -->
+  <script src="https://unpkg.com/@blockly/theme-scratchblocks"></script>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <!-- MathJax 3.0 -->
+  <!-- MathJax 3.0 (LaTeX 渲染) -->
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -32,6 +36,7 @@
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
+      --scratch-color: #FFAB19;
       --bg-main: #f8fafc;
       --bg-card: #ffffff;
       --text-main: #0f172a;
@@ -52,7 +57,7 @@
     }
     .brand-title { 
       font-size: 20px; font-weight: 700; 
-      background: linear-gradient(135deg, #4f46e5 0%, #FFAB19 100%);
+      background: linear-gradient(135deg, #FFAB19 0%, #4f46e5 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       margin-right: 15px; letter-spacing: -0.5px;
     }
@@ -75,16 +80,20 @@
       box-shadow: 0 2px 4px rgba(239, 68, 68, 0.25);
     }
     .btn-run:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(239, 68, 68, 0.35); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
 
     .select-custom { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background-color: #fff; font-size: 13px; outline: none; cursor: pointer; }
     .main-wrapper { display: flex; gap: 12px; height: calc(100vh - 85px); }
     .left-area { flex: 7; display: flex; flex-direction: column; height: 100%; min-width: 0; }
     .right-area { flex: 3; display: flex; flex-direction: column; height: 100%; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; overflow-y: auto; background: var(--bg-card); box-shadow: var(--shadow-sm); }
     
+    /* 雙系統引擎頁籤樣式 */
     .tab-bar { display: flex; gap: 6px; margin-bottom: 8px; }
-    .tab-btn { padding: 7px 16px; border: 1px solid transparent; background: transparent; cursor: pointer; border-radius: 6px; font-weight: 500; color: var(--text-muted); transition: all 0.2s; }
-    .tab-btn:hover { background: #e2e8f0; color: var(--text-main); }
-    .tab-btn.active { background: var(--bg-card); color: var(--primary); font-weight: 600; border-color: var(--border-color); box-shadow: var(--shadow-sm); }
+    .tab-btn { padding: 8px 18px; border: 1px solid var(--border-color); background: #ffffff; cursor: pointer; border-radius: 6px; font-weight: 500; color: var(--text-muted); transition: all 0.2s; }
+    .tab-btn:hover { background: #f1f5f9; color: var(--text-main); }
+    .tab-btn.active-blockly { background: var(--primary); color: white; font-weight: 600; border-color: var(--primary); }
+    .tab-btn.active-scratch { background: var(--scratch-color); color: white; font-weight: 600; border-color: var(--scratch-color); }
+    .tab-btn.active-code { background: #0f172a; color: #38bdf8; font-weight: 600; border-color: #0f172a; }
 
     .editor-container { flex: 1; position: relative; border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
     #blocklyDiv { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
@@ -124,10 +133,9 @@
   <!-- 頂部選單 -->
   <div class="top-menu">
     <div class="btn-group">
-      <span class="brand-title">willydesiner 🧱</span>
+      <span class="brand-title">willydesiner 🧩</span>
       <button class="btn" onclick="triggerImportXML()">📂 開啟檔案</button>
       <button class="btn" onclick="exportXML()">💾 儲存積木</button>
-      <button class="btn" onclick="runJavaScript()">⚡ 執行程式</button>
       <button class="btn" onclick="openLeaderboardModal()">🏆 排行榜</button>
       <button class="btn btn-admin" onclick="openAdminPanel()">⚙️ 管理後台</button>
       <input type="file" id="xmlFileInput" style="display:none" accept=".xml" onchange="importXML(event)">
@@ -144,16 +152,18 @@
   <!-- 主區域配置 -->
   <div class="main-wrapper">
     <div class="left-area">
+      <!-- 🔀 單一窗口內切換雙系統引擎的切換鈕 -->
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('blocks')">🧱 Blockly 專業工作區</button>
-        <button class="tab-btn" onclick="switchTab('javascript')">JavaScript (可逆向)</button>
+        <button class="tab-btn active-blockly" id="tabBlockly" onclick="switchEngine('blockly')">🧱 Blockly 專業模式</button>
+        <button class="tab-btn" id="tabScratch" onclick="switchEngine('scratch')">🐱 Scratch 經典模式</button>
+        <button class="tab-btn" id="tabJS" onclick="switchTab('javascript')">💻 JavaScript (可逆向)</button>
       </div>
       <div class="editor-container">
         <div id="blocklyDiv"></div>
         <div id="codeContainer">
-          <textarea id="jsInputArea" placeholder="// 可以在此貼上 JS 程式碼，並點擊下方「將 JS 逆向轉為積木」"></textarea>
+          <textarea id="jsInputArea" placeholder="// 可以在此貼上 JS 程式碼，點擊下方按鈕逆向還原"></textarea>
           <div class="js-tools">
-            <span style="color:#94a3b8; font-size:12px;">支援基礎語法：let 變數、Prompt、Alert、加減乘除</span>
+            <span style="color:#94a3b8; font-size:12px;">支援語法：let 變數、Prompt、Alert、數學運算</span>
             <button class="btn btn-primary" onclick="convertJsToBlockly()">🔄 將 JS 逆向轉為積木</button>
           </div>
         </div>
@@ -258,9 +268,9 @@
     </div>
   </div>
 
-  <!-- 🧱 完整 Blockly 工具箱 (包含動態變數、清單與自訂函式) -->
-  <xml id="toolbox" style="display: none">
-    <category name="輸入與輸出" colour="#ff0000">
+  <!-- 🧱 1. Blockly 專業模式工具箱 (獨立清單 & 函式) -->
+  <xml id="toolbox-blockly" style="display: none">
+    <category name="專用 IO" colour="#ff0000">
       <block type="text_print"></block>
       <block type="text_prompt_ext"><value name="TEXT"><shadow type="text"><field name="TEXT">請輸入數據</field></shadow></value></block>
     </category>
@@ -291,8 +301,6 @@
       <block type="text_join"></block>
       <block type="text_length"></block>
     </category>
-    
-    <!-- 📋 陣列/清單分類 (完整動態支援) -->
     <category name="清單 (Lists)" colour="%{BKY_LISTS_HUE}">
       <block type="lists_create_empty"></block>
       <block type="lists_create_with"></block>
@@ -303,13 +311,56 @@
       <block type="lists_getIndex"></block>
       <block type="lists_setIndex"></block>
     </category>
-    
     <sep></sep>
-    
-    <!-- 📌 變數分類 (動態生成按鈕) -->
     <category name="變數" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}"></category>
-    <!-- ⚙️ 函式分類 (動態生成建立函式積木) -->
     <category name="函式 (Functions)" custom="PROCEDURE" colour="%{BKY_PROCEDURES_HUE}"></category>
+  </xml>
+
+  <!-- 🐱 2. Scratch 經典模式工具箱 (獨立清單 & 函式) -->
+  <xml id="toolbox-scratch" style="display: none">
+    <category name="外觀與說出 (Looks)" colour="#9966FF">
+      <block type="text_print">
+        <value name="TEXT">
+          <shadow type="text"><field name="TEXT">🐱 說出 Hello Scratch!</field></shadow>
+        </value>
+      </block>
+    </category>
+    <category name="偵測與詢問 (Sensing)" colour="#5CB1D6">
+      <block type="text_prompt_ext">
+        <value name="TEXT">
+          <shadow type="text"><field name="TEXT">詢問：請輸入數據？</field></shadow>
+        </value>
+      </block>
+    </category>
+    <category name="控制 (Control)" colour="#FFAB19">
+      <block type="controls_repeat_ext">
+        <value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+      </block>
+      <block type="controls_whileUntil"></block>
+      <block type="controls_if"></block>
+    </category>
+    <category name="運算 (Operators)" colour="#59C059">
+      <block type="math_number"><field name="NUM">0</field></block>
+      <block type="math_arithmetic"></block>
+      <block type="math_single"><field name="OP">ROOT</field></block>
+      <block type="math_trig"><field name="OP">SIN</field></block>
+      <block type="math_random_int">
+        <value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+        <value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
+      </block>
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+    </category>
+    <category name="清單 (Lists)" colour="#FF661A">
+      <block type="lists_create_empty"></block>
+      <block type="lists_create_with"></block>
+      <block type="lists_length"></block>
+      <block type="lists_getIndex"></block>
+      <block type="lists_setIndex"></block>
+    </category>
+    <sep></sep>
+    <category name="變數 (Variables)" custom="VARIABLE" colour="#FF8C1A"></category>
+    <category name="自訂積木 (My Blocks)" custom="PROCEDURE" colour="#FF6680"></category>
   </xml>
 
   <script>
@@ -329,6 +380,7 @@
     let userId = localStorage.getItem('willydesiner_uid') || 'user_' + Math.random().toString(36).substr(2, 9);
     let userName = localStorage.getItem('willydesiner_uname') || '';
     let lastSubmitTime = 0;
+    let currentEngine = 'blockly';
     let workspace = null;
 
     localStorage.setItem('willydesiner_uid', userId);
@@ -352,13 +404,48 @@
     let questions = [];
     let currentQuestion = null;
 
-    // 🧱 初始化 Blockly
-    workspace = Blockly.inject('blocklyDiv', {
-      toolbox: document.getElementById('toolbox'),
-      scrollbars: true,
-      grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
-      zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
-    });
+    // 🔀 雙系統動態切換引擎（不離開頁面）
+    function switchEngine(mode) {
+      currentEngine = mode;
+      
+      const tabBlockly = document.getElementById('tabBlockly');
+      const tabScratch = document.getElementById('tabScratch');
+      const tabJS = document.getElementById('tabJS');
+
+      tabBlockly.className = mode === 'blockly' ? 'tab-btn active-blockly' : 'tab-btn';
+      tabScratch.className = mode === 'scratch' ? 'tab-btn active-scratch' : 'tab-btn';
+      tabJS.className = 'tab-btn';
+
+      const toolboxId = mode === 'scratch' ? 'toolbox-scratch' : 'toolbox-blockly';
+      const themeObj = (mode === 'scratch' && typeof Blockly.Themes !== 'undefined' && Blockly.Themes.Scratch) 
+                       ? Blockly.Themes.Scratch : null;
+
+      initWorkspace(toolboxId, themeObj);
+      switchTab('blocks');
+    }
+
+    function initWorkspace(toolboxId, themeObj) {
+      let xmlDom = null;
+      if (workspace) {
+        try { xmlDom = Blockly.Xml.workspaceToDom(workspace); } catch(e){}
+        workspace.dispose();
+      }
+
+      const options = {
+        toolbox: document.getElementById(toolboxId),
+        scrollbars: true,
+        grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
+        zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
+      };
+
+      if (themeObj) options.theme = themeObj;
+
+      workspace = Blockly.inject('blocklyDiv', options);
+
+      if (xmlDom) {
+        try { Blockly.Xml.appendDomToWorkspace(xmlDom, workspace); } catch(e){}
+      }
+    }
 
     function getJSGen() { return (typeof javascript !== 'undefined' && javascript.javascriptGenerator) ? javascript.javascriptGenerator : Blockly.JavaScript; }
     function updateUserNameUI() { document.getElementById('userDisplayName').innerText = userName || '未登入'; }
@@ -444,6 +531,7 @@
 
         Object.keys(users).forEach(uid => {
           const u = users[uid];
+          // 🟢 只過濾線上帳號
           if (u.online === true) {
             onlineCount++;
             const tr = document.createElement('tr');
@@ -520,14 +608,13 @@
       });
     }
 
-    // 🔗 讀取 URL 中的 ?value=... 參數
+    // 🔗 支援 ?value=... 帶參傳送
     function applyUrlParameterQuery() {
       const urlParams = new URLSearchParams(window.location.search);
       const valParam = urlParams.get('value') || urlParams.get('q');
       const select = document.getElementById('questionSelect');
 
       if (valParam) {
-        // 如果網址有傳帶參，自動選取
         const target = questions.find(q => q.id === valParam || q.title === valParam);
         if (target) {
           select.value = target.id;
@@ -559,17 +646,17 @@
     }
 
     function switchTab(tab) {
-      document.querySelectorAll('.left-area .tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-
       const blocklyDiv = document.getElementById('blocklyDiv');
       const codeContainer = document.getElementById('codeContainer');
+      const tabJS = document.getElementById('tabJS');
 
       if (tab === 'blocks') {
         blocklyDiv.style.display = 'block';
         codeContainer.style.display = 'none';
         Blockly.svgResize(workspace);
       } else if (tab === 'javascript') {
+        document.querySelectorAll('.tab-btn').forEach(b => b.className = 'tab-btn');
+        tabJS.className = 'tab-btn active-code';
         blocklyDiv.style.display = 'none';
         codeContainer.style.display = 'flex';
         document.getElementById('jsInputArea').value = getJSGen().workspaceToCode(workspace) || '';
@@ -822,6 +909,8 @@
 
     window.addEventListener('resize', () => { if (workspace) Blockly.svgResize(workspace); });
     
+    // 初始化系統
+    switchEngine('blockly');
     initQuestions();
     initUserTracker();
   </script>

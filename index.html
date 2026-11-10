@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>willydesiner - Blockly 雲端同步評測平台</title>
+  <title>willydesiner - Blockly 雲端評測平台</title>
   
-  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,18 +14,15 @@
   <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
   <script src="https://unpkg.com/blockly/python_compressed.js"></script>
   <script src="https://unpkg.com/blockly/msg/zh-hant.js"></script>
-  
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <!-- MathJax 3.0 (LaTeX 專業數學公式渲染) -->
+  <!-- MathJax 3.0 -->
   <script>
     window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-      },
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
       svg: { fontCache: 'global' }
     };
   </script>
@@ -36,10 +32,6 @@
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
-      --secondary: #64748b;
-      --success: #10b981;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
       --bg-main: #f8fafc;
       --bg-card: #ffffff;
       --text-main: #0f172a;
@@ -47,7 +39,6 @@
       --border-color: #e2e8f0;
       --radius: 8px;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
@@ -55,156 +46,75 @@
     body { margin: 0; padding: 12px; background-color: var(--bg-main); color: var(--text-main); font-size: 14px; min-height: 100vh; }
     
     .top-menu { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      background: var(--bg-card); 
-      padding: 10px 18px; 
-      border: 1px solid var(--border-color); 
-      margin-bottom: 12px; 
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
+      display: flex; justify-content: space-between; align-items: center; 
+      background: var(--bg-card); padding: 10px 18px; border: 1px solid var(--border-color); 
+      margin-bottom: 12px; border-radius: var(--radius); box-shadow: var(--shadow-sm);
     }
     .brand-title { 
-      font-size: 20px; 
-      font-weight: 700; 
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-right: 15px; 
-      letter-spacing: -0.5px;
+      font-size: 20px; font-weight: 700; 
+      background: linear-gradient(135deg, #4f46e5 0%, #FFAB19 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-right: 15px; letter-spacing: -0.5px;
     }
     .btn-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     
     .btn { 
-      padding: 6px 14px; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      font-size: 13px; 
-      font-weight: 500;
-      transition: all 0.2s ease;
-      border: 1px solid var(--border-color);
-      background: #ffffff;
-      color: var(--text-main);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+      transition: all 0.2s ease; border: 1px solid var(--border-color); background: #ffffff; color: var(--text-main);
+      display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
     }
     .btn:hover { background: #f1f5f9; border-color: #cbd5e1; transform: translateY(-1px); }
     .btn-primary { background: var(--primary); color: white; border: none; }
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-admin { background: #334155; color: white; border: none; }
     .btn-admin:hover { background: #1e293b; }
-    .btn-danger { background: var(--danger); color: white; border: none; }
-    .btn-danger:hover { background: var(--danger-hover); }
+    .btn-danger { background: #ef4444; color: white; border: none; }
     .btn-run { 
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
-      color: white; 
-      border: none; 
-      padding: 7px 18px; 
-      font-weight: 600;
+      color: white; border: none; padding: 7px 18px; font-weight: 600;
       box-shadow: 0 2px 4px rgba(239, 68, 68, 0.25);
     }
     .btn-run:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(239, 68, 68, 0.35); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
 
-    .select-custom {
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background-color: #fff;
-      font-size: 13px;
-      outline: none;
-      cursor: pointer;
-    }
-
+    .select-custom { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background-color: #fff; font-size: 13px; outline: none; cursor: pointer; }
     .main-wrapper { display: flex; gap: 12px; height: calc(100vh - 85px); }
     .left-area { flex: 7; display: flex; flex-direction: column; height: 100%; min-width: 0; }
-    .right-area { 
-      flex: 3; 
-      display: flex; 
-      flex-direction: column; 
-      height: 100%; 
-      border: 1px solid var(--border-color); 
-      border-radius: var(--radius); 
-      padding: 20px; 
-      overflow-y: auto; 
-      background: var(--bg-card); 
-      box-shadow: var(--shadow-sm);
-    }
-
+    .right-area { flex: 3; display: flex; flex-direction: column; height: 100%; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; overflow-y: auto; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+    
     .tab-bar { display: flex; gap: 6px; margin-bottom: 8px; }
-    .tab-btn { 
-      padding: 7px 16px; 
-      border: 1px solid transparent; 
-      background: transparent; 
-      cursor: pointer; 
-      border-radius: 6px; 
-      font-weight: 500;
-      color: var(--text-muted);
-      transition: all 0.2s;
-    }
+    .tab-btn { padding: 7px 16px; border: 1px solid transparent; background: transparent; cursor: pointer; border-radius: 6px; font-weight: 500; color: var(--text-muted); transition: all 0.2s; }
     .tab-btn:hover { background: #e2e8f0; color: var(--text-main); }
     .tab-btn.active { background: var(--bg-card); color: var(--primary); font-weight: 600; border-color: var(--border-color); box-shadow: var(--shadow-sm); }
-    
+
     .editor-container { flex: 1; position: relative; border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
     #blocklyDiv { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-    #codeContainer { 
-      width: 100%; 
-      height: 100%; 
-      position: absolute; 
-      top: 0; 
-      left: 0; 
-      display: none; 
-      background: #0f172a; 
-      padding: 12px; 
-      flex-direction: column;
-    }
-    #jsInputArea {
-      width: 100%;
-      flex: 1;
-      background: #0f172a;
-      color: #38bdf8;
-      border: none;
-      outline: none;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      resize: none;
-    }
+    #codeContainer { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; background: #0f172a; padding: 12px; flex-direction: column; }
+    #jsInputArea { width: 100%; flex: 1; background: #0f172a; color: #38bdf8; border: none; outline: none; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; resize: none; }
     .js-tools { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #1e293b; }
-
+    
     .q-title { text-align: center; color: var(--primary); font-size: 22px; font-weight: 700; margin-bottom: 15px; }
     .q-section-title { font-weight: 600; color: #334155; margin: 16px 0 8px 0; font-size: 14px; border-bottom: 2px solid #f1f5f9; padding-bottom: 4px; }
     .q-content { font-size: 13px; line-height: 1.7; color: #475569; }
-    
     .sample-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; font-size: 13px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
     .sample-table th, .sample-table td { border-bottom: 1px solid var(--border-color); padding: 10px; vertical-align: middle; text-align: center; }
     .sample-table th { background-color: #f8fafc; color: #475569; font-weight: 600; }
     .input-code-block { text-align: left; font-family: 'JetBrains Mono', monospace; white-space: pre-wrap; background: #f1f5f9; padding: 6px 10px; border-radius: 4px; font-size: 12px; color: #0f172a; }
-
+    
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 2000; }
     .modal-content { background: white; padding: 24px; border-radius: 12px; width: 780px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
-
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #334155; font-size: 13px; }
     .form-group input, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; }
-    .test-case-card { border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-bottom: 12px; background: #f8fafc; }
-
-    .rank-1 { background-color: #fef9c3; font-weight: bold; color: #854d0e; }
-    .rank-2 { background-color: #f1f5f9; font-weight: bold; color: #475569; }
-    .rank-3 { background-color: #ffedd5; font-weight: bold; color: #9a3412; }
     
     .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #dcfce7; color: #15803d; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
     .pulse-dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); animation: pulse 1.6s infinite; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
-
     #blockScreen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); color: white; z-index: 99999; flex-direction: column; justify-content: center; align-items: center; font-size: 22px; font-weight: 600; }
   </style>
 </head>
 <body>
 
-  <!-- ⛔ 被 BAN / 封鎖時的畫面覆蓋層 -->
+  <!-- ⛔ 被 BAN 覆蓋層 -->
   <div id="blockScreen">
     <div style="font-size: 64px; margin-bottom: 16px;">⛔</div>
     <div>您的使用權限已被管理員暫時封鎖 (Ban)</div>
@@ -214,11 +124,11 @@
   <!-- 頂部選單 -->
   <div class="top-menu">
     <div class="btn-group">
-      <span class="brand-title">willydesiner</span>
+      <span class="brand-title">willydesiner 🧱</span>
       <button class="btn" onclick="triggerImportXML()">📂 開啟檔案</button>
       <button class="btn" onclick="exportXML()">💾 儲存積木</button>
       <button class="btn" onclick="runJavaScript()">⚡ 執行程式</button>
-      <button class="btn" onclick="openLeaderboardModal()">🏆 多維度排行榜</button>
+      <button class="btn" onclick="openLeaderboardModal()">🏆 排行榜</button>
       <button class="btn btn-admin" onclick="openAdminPanel()">⚙️ 管理後台</button>
       <input type="file" id="xmlFileInput" style="display:none" accept=".xml" onchange="importXML(event)">
     </div>
@@ -235,10 +145,8 @@
   <div class="main-wrapper">
     <div class="left-area">
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('blocks')">🧱 積木工作區</button>
+        <button class="tab-btn active" onclick="switchTab('blocks')">🧱 Blockly 專業工作區</button>
         <button class="tab-btn" onclick="switchTab('javascript')">JavaScript (可逆向)</button>
-        <button class="tab-btn" onclick="switchTab('python')">Python</button>
-        <button class="tab-btn" onclick="switchTab('xml')">XML 代碼</button>
       </div>
       <div class="editor-container">
         <div id="blocklyDiv"></div>
@@ -256,10 +164,8 @@
       <div class="q-title" id="qTitle">載入中...</div>
       <div class="q-section-title">📌 問題描述</div>
       <div class="q-content" id="qDesc">...</div>
-      
       <div class="q-section-title">📝 題目說明</div>
       <div class="q-content" id="qDetail">...</div>
-
       <div class="q-section-title">💡 範例格式</div>
       <table class="sample-table">
         <thead>
@@ -278,14 +184,8 @@
   <div id="loginModal" class="modal">
     <div class="modal-content" style="width: 380px;">
       <h3 style="text-align: center; margin-top: 0;">👤 使用者登入 / 註冊</h3>
-      <div class="form-group">
-        <label>姓名 / 暱稱：</label>
-        <input type="text" id="loginNameInput" placeholder="例如：王小明">
-      </div>
-      <div class="form-group">
-        <label>登入密碼：</label>
-        <input type="password" id="loginPasswordInput" placeholder="請輸入密碼">
-      </div>
+      <div class="form-group"><label>姓名 / 暱稱：</label><input type="text" id="loginNameInput" placeholder="例如：王小明"></div>
+      <div class="form-group"><label>登入密碼：</label><input type="password" id="loginPasswordInput" placeholder="請輸入密碼"></div>
       <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;">
         <button class="btn" onclick="closeLoginModal()">取消</button>
         <button class="btn btn-primary" onclick="performLogin()">確認登入</button>
@@ -293,14 +193,11 @@
     </div>
   </div>
 
-  <!-- 🏆 防刷分排行榜 Modal -->
+  <!-- 🏆 排行榜 Modal -->
   <div id="leaderboardModal" class="modal">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <div>
-          <h2 style="margin:0; font-size:20px;">🏆 多維度防刷分排行榜</h2>
-          <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">比序：最高分 ➔ 耗時最短 ➔ 積木最少 ➔ 最早完成</div>
-        </div>
+        <h2 style="margin:0; font-size:20px;">🏆 多維度防刷分排行榜</h2>
         <span class="status-badge"><span class="pulse-dot"></span> Live Sync</span>
       </div>
       <table class="sample-table">
@@ -317,9 +214,7 @@
         </thead>
         <tbody id="leaderboardBody"><tr><td colspan="7">載入中...</td></tr></tbody>
       </table>
-      <div style="text-align: right; margin-top: 20px;">
-        <button class="btn" onclick="closeLeaderboardModal()">關閉</button>
-      </div>
+      <div style="text-align: right; margin-top: 20px;"><button class="btn" onclick="closeLeaderboardModal()">關閉</button></div>
     </div>
   </div>
 
@@ -327,35 +222,27 @@
   <div id="adminModal" class="modal">
     <div class="modal-content">
       <h2 style="margin-top:0;">⚙️ 管理員控制台</h2>
-      
       <div class="tab-bar" style="margin-bottom: 15px;">
         <button class="tab-btn active" onclick="switchAdminTab('users')">🚫 帳號 Ban/解封與在線</button>
         <button class="tab-btn" onclick="switchAdminTab('questions')">📚 題目管理</button>
         <button class="tab-btn" onclick="switchAdminTab('addQ')">➕ 新增題目</button>
       </div>
-
       <div id="adminTabUsers">
-        <h3 style="font-size:15px; font-weight:600; margin-bottom:10px;">使用者監控 (點擊按鈕一鍵 Ban / 解鎖)</h3>
+        <h3 style="font-size:15px; font-weight:600; margin-bottom:10px;">在線使用者監控</h3>
         <table class="sample-table">
-          <thead>
-            <tr><th>姓名</th><th>狀態</th><th>最近活動時間</th><th>Ban 帳號管理</th></tr>
-          </thead>
+          <thead><tr><th>姓名</th><th>狀態</th><th>最近活動時間</th><th>Ban 帳號管理</th></tr></thead>
           <tbody id="userListBody"><tr><td colspan="4">載入中...</td></tr></tbody>
         </table>
         <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 12px;">
           <button class="btn btn-danger" onclick="clearLeaderboard()">🗑 清空全部排行榜紀錄</button>
         </div>
       </div>
-
       <div id="adminTabQuestions" style="display:none;">
         <table class="sample-table">
-          <thead>
-            <tr><th width="30%">題目</th><th width="45%">描述</th><th width="25%">操作</th></tr>
-          </thead>
+          <thead><tr><th width="30%">題目</th><th width="45%">描述</th><th width="25%">操作</th></tr></thead>
           <tbody id="adminQListBody"><tr><td colspan="3">載入中...</td></tr></tbody>
         </table>
       </div>
-
       <div id="adminTabAddQ" style="display:none;">
         <div class="form-group"><label>題目名稱：</label><input type="text" id="newTitle"></div>
         <div class="form-group"><label>問題描述 (支援 LaTeX)：</label><textarea id="newDesc" rows="2"></textarea></div>
@@ -367,16 +254,13 @@
         </div>
         <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" onclick="saveNewQuestion()">儲存題目</button>
       </div>
-
-      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-        <button class="btn" onclick="closeAdminModal()">關閉後台</button>
-      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px;"><button class="btn" onclick="closeAdminModal()">關閉後台</button></div>
     </div>
   </div>
 
-  <!-- 🧱 擴充工具箱選單 (Toolbox) -->
+  <!-- 🧱 完整 Blockly 工具箱 (包含動態變數、清單與自訂函式) -->
   <xml id="toolbox" style="display: none">
-    <category name="專用" colour="#ff0000">
+    <category name="輸入與輸出" colour="#ff0000">
       <block type="text_print"></block>
       <block type="text_prompt_ext"><value name="TEXT"><shadow type="text"><field name="TEXT">請輸入數據</field></shadow></value></block>
     </category>
@@ -386,57 +270,46 @@
       <block type="logic_operation"></block>
       <block type="logic_boolean"></block>
       <block type="logic_negate"></block>
-      <block type="logic_ternary"></block>
     </category>
     <category name="迴圈" colour="%{BKY_LOOPS_HUE}">
       <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
       <block type="controls_whileUntil"></block>
-      <block type="controls_for">
-        <value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
-        <value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
-        <value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
-      </block>
-      <block type="controls_forEach"></block>
-      <block type="controls_flow_statements"></block>
+      <block type="controls_for"></block>
     </category>
-    <category name="數學" colour="%{BKY_MATH_HUE}">
+    <category name="高階數學" colour="%{BKY_MATH_HUE}">
       <block type="math_number"><field name="NUM">0</field></block>
       <block type="math_arithmetic"></block>
-      <!-- 開根號 sqrt、絕對值 abs、ln、exp 等進階運算 -->
       <block type="math_single"><field name="OP">ROOT</field></block>
       <block type="math_trig"><field name="OP">SIN</field></block>
       <block type="math_constant"><field name="CONSTANT">PI</field></block>
-      <block type="math_number_property"></block>
       <block type="math_round"></block>
       <block type="math_modulo"></block>
-      <block type="math_constrain"></block>
-      <block type="math_random_int">
-        <value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
-        <value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
-      </block>
+      <block type="math_random_int"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
     </category>
     <category name="文字" colour="%{BKY_TEXTS_HUE}">
       <block type="text"></block>
       <block type="text_join"></block>
-      <block type="text_append"></block>
       <block type="text_length"></block>
-      <block type="text_isEmpty"></block>
-      <block type="text_indexOf"></block>
-      <block type="text_charAt"></block>
-      <block type="text_print"></block>
     </category>
-    <category name="清單" colour="%{BKY_LISTS_HUE}">
+    
+    <!-- 📋 陣列/清單分類 (完整動態支援) -->
+    <category name="清單 (Lists)" colour="%{BKY_LISTS_HUE}">
       <block type="lists_create_empty"></block>
       <block type="lists_create_with"></block>
-      <block type="lists_repeat"></block>
+      <block type="lists_repeat"><value name="NUM"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block>
       <block type="lists_length"></block>
       <block type="lists_isEmpty"></block>
       <block type="lists_indexOf"></block>
       <block type="lists_getIndex"></block>
       <block type="lists_setIndex"></block>
     </category>
+    
+    <sep></sep>
+    
+    <!-- 📌 變數分類 (動態生成按鈕) -->
     <category name="變數" custom="VARIABLE" colour="%{BKY_VARIABLES_HUE}"></category>
-    <category name="函式" custom="PROCEDURE" colour="%{BKY_PROCEDURES_HUE}"></category>
+    <!-- ⚙️ 函式分類 (動態生成建立函式積木) -->
+    <category name="函式 (Functions)" custom="PROCEDURE" colour="%{BKY_PROCEDURES_HUE}"></category>
   </xml>
 
   <script>
@@ -456,6 +329,8 @@
     let userId = localStorage.getItem('willydesiner_uid') || 'user_' + Math.random().toString(36).substr(2, 9);
     let userName = localStorage.getItem('willydesiner_uname') || '';
     let lastSubmitTime = 0;
+    let workspace = null;
+
     localStorage.setItem('willydesiner_uid', userId);
 
     try {
@@ -477,7 +352,8 @@
     let questions = [];
     let currentQuestion = null;
 
-    const workspace = Blockly.inject('blocklyDiv', {
+    // 🧱 初始化 Blockly
+    workspace = Blockly.inject('blocklyDiv', {
       toolbox: document.getElementById('toolbox'),
       scrollbars: true,
       grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
@@ -485,7 +361,6 @@
     });
 
     function getJSGen() { return (typeof javascript !== 'undefined' && javascript.javascriptGenerator) ? javascript.javascriptGenerator : Blockly.JavaScript; }
-
     function updateUserNameUI() { document.getElementById('userDisplayName').innerText = userName || '未登入'; }
     function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
     function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
@@ -565,22 +440,28 @@
         const users = snap.val() || {};
         const tbody = document.getElementById('userListBody');
         tbody.innerHTML = '';
+        let onlineCount = 0;
+
         Object.keys(users).forEach(uid => {
           const u = users[uid];
-          const tr = document.createElement('tr');
-          const isBlocked = u.isBlocked || false;
-          tr.innerHTML = `
-            <td><strong>${u.name}</strong></td>
-            <td>${u.online ? '<span class="status-badge"><span class="pulse-dot"></span>在線</span>' : '離線'} ${isBlocked ? '<b style="color:var(--danger)">(已 Ban)</b>' : ''}</td>
-            <td>${u.lastActive || '-'}</td>
-            <td>
-              <button class="btn ${isBlocked ? 'btn-primary' : 'btn-danger'}" style="padding:2px 8px; font-size:11px;" onclick="toggleBanUser('${uid}', ${isBlocked})">
-                ${isBlocked ? '🟢 解封 (Unban)' : '🚫 封鎖 (Ban)'}
-              </button>
-            </td>
-          `;
-          tbody.appendChild(tr);
+          if (u.online === true) {
+            onlineCount++;
+            const tr = document.createElement('tr');
+            const isBlocked = u.isBlocked || false;
+            tr.innerHTML = `
+              <td><strong>${u.name || '無名氏'}</strong></td>
+              <td><span class="status-badge"><span class="pulse-dot"></span>在線</span> ${isBlocked ? '<b style="color:var(--danger)">(已 Ban)</b>' : ''}</td>
+              <td>${u.lastActive || '-'}</td>
+              <td>
+                <button class="btn ${isBlocked ? 'btn-primary' : 'btn-danger'}" style="padding:2px 8px; font-size:11px;" onclick="toggleBanUser('${uid}', ${isBlocked})">
+                  ${isBlocked ? '🟢 解封' : '🚫 封鎖'}
+                </button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          }
         });
+        if (onlineCount === 0) tbody.innerHTML = '<tr><td colspan="4">目前無使用者在線</td></tr>';
       });
     }
 
@@ -620,12 +501,12 @@
         db.ref('questions').on('value', snap => {
           questions = snap.val() ? Object.values(snap.val()) : defaultQuestions;
           renderSelectOptions();
-          if (questions.length) loadQuestion(questions[0].id);
+          applyUrlParameterQuery();
         });
       } else {
         questions = defaultQuestions;
         renderSelectOptions();
-        loadQuestion(questions[0].id);
+        applyUrlParameterQuery();
       }
     }
 
@@ -637,6 +518,24 @@
         opt.value = q.id; opt.innerText = q.title;
         select.appendChild(opt);
       });
+    }
+
+    // 🔗 讀取 URL 中的 ?value=... 參數
+    function applyUrlParameterQuery() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const valParam = urlParams.get('value') || urlParams.get('q');
+      const select = document.getElementById('questionSelect');
+
+      if (valParam) {
+        // 如果網址有傳帶參，自動選取
+        const target = questions.find(q => q.id === valParam || q.title === valParam);
+        if (target) {
+          select.value = target.id;
+          loadQuestion(target.id);
+          return;
+        }
+      }
+      if (questions.length) loadQuestion(questions[0].id);
     }
 
     function switchQuestion() { loadQuestion(document.getElementById('questionSelect').value); }
@@ -677,7 +576,6 @@
       }
     }
 
-    /* 🔄 JavaScript 逆向轉為 Blockly 積木核心引擎 */
     function convertJsToBlockly() {
       const jsCode = document.getElementById('jsInputArea').value;
       if (!jsCode.trim()) return alert("請先輸入 JavaScript 程式碼！");
@@ -922,7 +820,8 @@
       if (e.target.files[0]) reader.readAsText(e.target.files[0]);
     }
 
-    window.addEventListener('resize', () => Blockly.svgResize(workspace));
+    window.addEventListener('resize', () => { if (workspace) Blockly.svgResize(workspace); });
+    
     initQuestions();
     initUserTracker();
   </script>
